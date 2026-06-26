@@ -15,6 +15,8 @@ def main():
     screen = pygame.display.set_mode((1300, 800))
     # creates a Character from the my_character.py file
     character = my_character.Character(screen, 100, 100)
+    red_r = pygame.image.load("RoseHulmanRedR.png")
+    red_r = pygame.transform.scale(red_r, (630, 758))
 
     # let's set the framerate
     clock = pygame.time.Clock()
@@ -28,14 +30,15 @@ def main():
 
         # TODO: Fill the screen with whatever background color you like!
         screen.fill((255, 255, 255))
-
+        screen.blit(red_r, (screen.get_width() / 2 - red_r.get_width() / 2, screen.get_height() / 2 - red_r.get_height() / 2))
+        # (screen.get_width() / 2 + red_r.get_width() / 2, screen.get_height() / 2 + red_r.get_height() / 2)
         # draws the character every frame
-        character.draw()
+        # character.draw()
 
         # TODO: Add your project code
 
         # don't forget the update, otherwise nothing will show up!
         pygame.display.update()
-        print('hello world')
+
 
 main()
