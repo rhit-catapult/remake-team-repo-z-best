@@ -21,6 +21,15 @@ def main():
                 sys.exit()
 
             # TODO: Add you events code
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.K_w]:
+            character.y -= 5
+        if pressed_keys[pygame.K_s]:
+            character.y += 5
+        if pressed_keys[pygame.K_a]:
+            character.x -= 5
+        if pressed_keys[pygame.K_d]:
+            character.x += 5
 
         # TODO: Fill the screen with whatever background color you like!
         screen.fill((255, 255, 255))
