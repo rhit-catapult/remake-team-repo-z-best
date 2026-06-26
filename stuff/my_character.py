@@ -2,16 +2,15 @@ import pygame
 import sys
 
 
-class Character:
-    def __init__(self, screen: pygame.Surface, x, y):
+class MainC:
+    def __init__(self, screen, x, y, image_filename):
         self.screen = screen
         self.x = x
         self.y = y
+        self.image = pygame.image.load(image_filename)
 
     def draw(self):
-        pygame.draw.rect(self.screen, "blue", (self.x, self.y, 20, 20))
-        pygame.draw.circle(self.screen, "red", (self.x + 5, self.y + 5), 3)
-        pygame.draw.circle(self.screen, "red", (self.x + 15, self.y + 5), 3)
+        self.screen.blit(self.image, (self.x, self.y))
 
 
 # This function is called when you run this file, and is used to test the Character class individually.
@@ -20,7 +19,7 @@ class Character:
 def test_character():
     # TODO: change this function to test your class
     screen = pygame.display.set_mode((640, 480))
-    character = Character(screen, 400, 400)
+    character = MainC(screen, 400, 400, "Character_Placeholder.png")
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

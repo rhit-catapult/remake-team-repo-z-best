@@ -1,20 +1,16 @@
 import pygame
 import sys
-import my_character
 import random
 import time
-
+from my_character import MainC
 
 def main():
     # turn on pygame
     pygame.init()
-
-    # create a screen
     pygame.display.set_caption("Cool Project")
-    # TODO: Change the size of the screen as you see fit!
     screen = pygame.display.set_mode((1300, 800))
     # creates a Character from the my_character.py file
-    character = my_character.Character(screen, 100, 100)
+    character = MainC(screen, 100, 100, "Character_Placeholder.png")
 
     # let's set the framerate
     clock = pygame.time.Clock()
