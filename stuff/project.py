@@ -30,16 +30,17 @@ def main():
             character.x -= 5
         if pressed_keys[pygame.K_d]:
             character.x += 5
+        character.update_angle()
 
         # TODO: Fill the screen with whatever background color you like!
         screen.fill((255, 255, 255))
+
         # draws the character every frame
-        # character.draw()
+        character.draw()
 
         # TODO: Add your project code
 
         # don't forget the update, otherwise nothing will show up!
         pygame.display.update()
-
 
 main()
