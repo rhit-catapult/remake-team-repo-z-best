@@ -33,14 +33,13 @@ def main():
 
         # TODO: Fill the screen with whatever background color you like!
         screen.fill((255, 255, 255))
-
         # draws the character every frame
-        character.draw()
+        # character.draw()
 
         # TODO: Add your project code
 
         # don't forget the update, otherwise nothing will show up!
         pygame.display.update()
-        print('hello world')
+
 
 main()
