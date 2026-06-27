@@ -7,7 +7,7 @@ from my_character import MainC
 def main():
     # turn on pygame
     pygame.init()
-    pygame.display.set_caption("Cool Project")
+    pygame.display.set_caption("peanut apocolypse")
     screen = pygame.display.set_mode((1300, 800))
     # creates a Character from the my_character.py file
     character = MainC(screen, 100, 100, "Character_Placeholder.png")
