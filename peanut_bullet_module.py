@@ -9,7 +9,8 @@ class Bullet:
     def __init__(self, screen: pygame.Surface):
         self.screen = screen
         self.peanut = pygame.image.load("Peanut_bullet.png")
-        # self.peanut = pygame.
+        scale = 0.2
+        self.peanut = pygame.transform.scale(self.peanut, (self.peanut.get_width() * scale, self.peanut.get_height() * scale))
 
     def shoot(self, x, y):
         self.screen.blit(self.peanut, (x, y))
