@@ -34,6 +34,7 @@ def main():
         player.update_angle()
 ############################################################################
         zombie.follow_player(player)
+        player.mouse_x, player.mouse_y = pygame.mouse.get_pos()
         zombie.update_angle(player)
 
 
@@ -47,6 +48,7 @@ def main():
         # TODO: Add your project code
 
         # don't forget the update, otherwise nothing will show up!
+        
         pygame.display.update()
 
 main()
