@@ -29,7 +29,6 @@ box = pygame.transform.scale(box_raw,(TILE_SIZE,TILE_SIZE))
 corpse_raw = pygame.image.load(("dead_Zombie.png")).convert_alpha()
 corpse = pygame.transform.scale(corpse_raw, (CORPSE_SIZE, TILE_SIZE))
 
-#tile_box = 
 
 
 # 自定义地图：0草地，1石头
@@ -45,9 +44,10 @@ map_data = [
 ]
 
 items = [
-    (11, 6, 10),  # (row, column, item_type)
-    (5, 6, 20)
+    (6, 10, 10),  # (row, column, item_type)
+    (6, 5, 20)
 ]
+
 
 def draw_tile_map():
     for row_idx, row in enumerate(map_data):
