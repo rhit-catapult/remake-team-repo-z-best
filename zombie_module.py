@@ -10,6 +10,13 @@ class Zombie:
         self.original_image = pygame.image.load(image_filename).convert_alpha()
         self.image = self.original_image
         self.rect = self.image.get_rect(center=(self.x, self.y))
+        self.original_image = pygame.image.load(image_filename).convert_alpha()
+        self.hp = 3
+# SCALE THE ZOMBIE
+        scale = 0.5   # 50% size — change this number to whatever you want
+        w = self.original_image.get_width()
+        h = self.original_image.get_height()
+        self.original_image = pygame.transform.scale(self.original_image, (int(w * scale), int(h * scale)))
         self.radius = 40   # adjust to match your zombie sprite size
 
     def follow_player(self, player, speed=2):
@@ -28,7 +35,6 @@ class Zombie:
         self.y += dy * speed
 
         self.rect.center = (self.x, self.y)
-
     def update_angle(self, player):
         # Instantly face the player
         dx = player.x - self.x
