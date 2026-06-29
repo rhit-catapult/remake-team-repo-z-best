@@ -22,7 +22,7 @@ tile_wall = pygame.transform.scale(tile_wall_raw, (TILE_SIZE,TILE_SIZE))
 tile_grass_raw = pygame.image.load(("grass-tile.png"))
 tile_grass = pygame.transform.scale(tile_grass_raw, (TILE_SIZE, TILE_SIZE))
 
-box_raw = pygame.image.load((""))
+box_raw = pygame.image.load(("box.png"))
 box = pygame.transform.scale(box_raw,(TILE_SIZE,TILE_SIZE))
 
 #tile_box = 
@@ -41,7 +41,7 @@ map_data = [
 ]
 
 items = [
-    (7,7,0)
+    (7,7,10)
 
 ]
 
@@ -64,7 +64,7 @@ def draw_items():
         x = col *TILE_SIZE
         y = row *TILE_SIZE
 
-        if item_type == 0:
+        if item_type == 10:
             screen.blit(box,(x,y))
 
             
