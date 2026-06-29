@@ -4,7 +4,6 @@ import random
 import time
 
 
-
 class Map:
     def __init__(self, screen: pygame.Surface):
         self.screen = screen
@@ -14,9 +13,10 @@ class Map:
     
     def draw(self):
         self.screen.blit(self.grey_r, (self.screen.get_width() / 2 - self.grey_r.get_width() / 2, self.screen.get_height() / 2 - self.grey_r.get_height() / 2))
-
+#level_counter = 0
 class Rooms:
-    def __init__(self,screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, ):
+        self.level_counter = 8
         self.screen = screen
         self.room_1 = pygame.image.load("room1.png")
         self.room_1 = pygame.transform.scale(self.room_1, (630, 758))
@@ -38,7 +38,6 @@ class Rooms:
         self.room_9 = pygame.transform.scale(self.room_9, (630, 758))
         self.room_10 = pygame.image.load("room10.png")
         self.room_10 = pygame.transform.scale(self.room_10, (630, 758))
-        self.level_counter = 10
 
     def draw(self):
         if self.level_counter is 1:
@@ -75,6 +74,8 @@ class Rooms:
             self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
             self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
             self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
+            self.screen.blit(self.room_7,(self.screen.get_width() / 2 - self.room_7.get_width() / 2, self.screen.get_height() / 2 - self.room_7.get_height() / 2))
+
         if self.level_counter is 8:
             self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
             self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
@@ -82,6 +83,8 @@ class Rooms:
             self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
             self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
             self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
+            self.screen.blit(self.room_7,(self.screen.get_width() / 2 - self.room_7.get_width() / 2, self.screen.get_height() / 2 - self.room_7.get_height() / 2))
+            self.screen.blit(self.room_8,(self.screen.get_width() / 2 - self.room_8.get_width() / 2, self.screen.get_height() / 2 - self.room_8.get_height() / 2))
         if self.level_counter is 9:
             self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
             self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
@@ -89,6 +92,9 @@ class Rooms:
             self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
             self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
             self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
+            self.screen.blit(self.room_7,(self.screen.get_width() / 2 - self.room_7.get_width() / 2, self.screen.get_height() / 2 - self.room_7.get_height() / 2))
+            self.screen.blit(self.room_8,(self.screen.get_width() / 2 - self.room_8.get_width() / 2, self.screen.get_height() / 2 - self.room_8.get_height() / 2))
+            self.screen.blit(self.room_9,(self.screen.get_width() / 2 - self.room_9.get_width() / 2, self.screen.get_height() / 2 - self.room_9.get_height() / 2))
         if self.level_counter is 10:
             self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
             self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
@@ -109,7 +115,7 @@ def main():
     screen = pygame.display.set_mode((1300, 800))
     big_r = Map(screen)
     clock = pygame.time.Clock()
-    mapped_room_1 = Rooms(screen)
+    mapped_room = Rooms(screen)
     
 
     while True:
@@ -117,13 +123,12 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-        
-
-
-    
+        #if event.tye == pygame.MOUSEBUTTONDOWN:
+           # level_counter += 1       
+       
         screen.fill((255, 255, 255))
         big_r.draw()
-        mapped_room_1.draw()
+        mapped_room.draw()
         pygame.display.update()
 
 
