@@ -3,26 +3,30 @@ import sys
 import random
 import time
 import data_module
+import my_character
 
 
 class Bullet:
-    def __init__(self, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, hero_x, hero_y):
         self.screen = screen
         self.peanut = pygame.image.load("Peanut_bullet.png")
         scale = 0.2
         self.peanut = pygame.transform.scale(self.peanut, (self.peanut.get_width() * scale, self.peanut.get_height() * scale))
+        self.mouse_x = pygame.mouse.get_pos()[0]
+        self.mouse_y = pygame.mouse.get_pos()[1]
+        self.bullet_x = hero_x
+        self.bullet_y = hero_y
+        self.change_x = self.bullet_x - self.mouse_x
+        self.change_y = self.bullet_y - self.mouse_y
+        # self.speed = (self.bullet_x - self.change_x) / 1 + (self.bullet_y - self.change_y)
+        self.speed = 100
+    def move(self):
+        self.bullet_x -= self.change_x // self.speed
+        self.bullet_y -= self.change_y // self.speed
 
-    def shoot(self, x, y):
-        self.screen.blit(self.peanut, (x, y))
+    def draw(self):
+        self.screen.blit(self.peanut, (self.bullet_x, self.bullet_y))
         
-    def draw_crosshairs(self):
-        self.x = pygame.mouse.get_pos()[0]
-        self.y = pygame.mouse.get_pos()[1]
-        crosshair_width = 2
-        crosshair_height = 30
-        pygame.draw.rect(self.screen, pygame.Color("black"), (self.x - crosshair_width / 2, self.y - crosshair_height / 2, crosshair_width, crosshair_height))
-        pygame.draw.rect(self.screen, pygame.Color("black"), (self.x - crosshair_height / 2, self.y - crosshair_width / 2, crosshair_height, crosshair_width))
-
 
 
 
@@ -32,31 +36,28 @@ def main():
     screen = pygame.display.set_mode((1300, 800))
     clock = pygame.time.Clock()
     mouse = data_module.MousePosition(screen)
-    bullet = Bullet(screen)
-    bullet_active = False
-    x = 500
-    y = 500
+    hero = my_character.MainC(screen, 600, 700, "Character_Placeholder.png")
+    bullet = Bullet(screen, hero.x, hero.y)
 
     while True:
         clock.tick(20)
         for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if mouse.is_clicked(event.pos):
+                    hero.fire()
             if event.type == pygame.QUIT:
                 sys.exit()
     
         screen.fill((255, 255, 255))
-        if event.type == pygame.MOUSEBUTTONDOWN:
-                if mouse.is_clicked(event.pos):
-                    end_x, end_y = event.pos
-                    bullet_active = True
+        
+        for bullet in hero.bullets:
+            bullet.move()
+            bullet.draw()
+            
+        hero.update_angle()
+        hero.draw()
+        hero.draw_crosshairs()
 
-        if bullet_active == True:
-            if x == 0 or y == 0:
-                bullet_active = False
-            bullet.shoot(x, y)
-            x += (end_x - x) / 100
-            y += (end_y - y) / 100
-
-        bullet.draw_crosshairs()
         pygame.display.update()
 
 
