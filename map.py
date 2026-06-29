@@ -14,7 +14,15 @@ class Map:
     
     def draw(self):
         self.screen.blit(self.grey_r, (self.screen.get_width() / 2 - self.grey_r.get_width() / 2, self.screen.get_height() / 2 - self.grey_r.get_height() / 2))
-       
+
+class Rooms:
+    def __init__(self,screen: pygame.Surface):
+        self.screen = screen
+        self.room_1 = pygame.image.load("room1.png")
+        self.room_1 = pygame.transform.scale(self.room_1, (630, 758))
+
+    def draw(self):
+        self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
 
 def main():
     pygame.init()
@@ -22,16 +30,20 @@ def main():
     screen = pygame.display.set_mode((1300, 800))
     big_r = Map(screen)
     clock = pygame.time.Clock()
+    mapped_room_1 = Rooms(screen)
 
     while True:
         clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+        
+
 
     
         screen.fill((255, 255, 255))
         big_r.draw()
+        mapped_room_1.draw()
         pygame.display.update()
 
 
