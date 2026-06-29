@@ -2,6 +2,7 @@ import pygame
 
 pygame.init()
 TILE_SIZE = 100
+CORPSE_SIZE = 200
 W, H = 1300,800 
 screen = pygame.display.set_mode((W, H))
 
@@ -25,6 +26,9 @@ tile_grass = pygame.transform.scale(tile_grass_raw, (TILE_SIZE, TILE_SIZE))
 box_raw = pygame.image.load(("box.png"))
 box = pygame.transform.scale(box_raw,(TILE_SIZE,TILE_SIZE))
 
+corpse_raw = pygame.image.load(())
+corpse = pygame.transform.scale(corpse_raw, (CORPSE_SIZE, TILE_SIZE))
+
 #tile_box = 
 
 
@@ -41,8 +45,9 @@ map_data = [
 ]
 
 items = [
-    (7,7,10)
-
+    (7,7,10),
+    (7,5,20)
+    
 ]
 
 def draw_tile_map():
@@ -66,6 +71,8 @@ def draw_items():
 
         if item_type == 10:
             screen.blit(box,(x,y))
+        elif item_type == 20:
+            screen.blit(corpse,(x,y))
 
             
 
@@ -78,6 +85,7 @@ while running:
 
     screen.fill((0,0,0))
     draw_tile_map()
+    draw_items()
     pygame.display.flip()
     clock.tick(60)
 pygame.quit() 
