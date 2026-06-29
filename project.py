@@ -2,6 +2,9 @@ import pygame
 import sys
 import random
 import time
+import math
+from healthbar import HealthBar
+from map import Map
 from peanut_bullet_module import Bullet
 from my_character import MainC
 from zombie_module import Zombie
@@ -13,6 +16,7 @@ def main():
 
     player = MainC(screen, 100, 100, "Character_Placeholder.png")
     zombie = Zombie(screen, 600, 300, "ZombieFIXED.png")
+    healthbar = HealthBar(screen)
 
     clock = pygame.time.Clock()
 
@@ -42,8 +46,20 @@ def main():
         ############################################################################
         player.mouse_x, player.mouse_y = pygame.mouse.get_pos()
         player.update_angle()
-        
+
         zombie.follow_player(player)
+        current_time = pygame.time.get_ticks()
+
+# COLLISION CHECK
+        dx = player.x - zombie.x
+        dy = player.y - zombie.y
+        distance = math.hypot(dx, dy)
+
+        if distance < (player.radius + zombie.radius):
+            if current_time - player.last_hit_time > 1000:
+                player.hp -= 1
+                player.last_hit_time = current_time
+                healthbar.set_hp(player.hp)
         zombie.update_angle(player)
 
         screen.fill((255, 255, 255))
@@ -53,7 +69,7 @@ def main():
 
         player.draw()
         zombie.draw()
-
+        healthbar.draw()
         pygame.display.update()
 
 main()

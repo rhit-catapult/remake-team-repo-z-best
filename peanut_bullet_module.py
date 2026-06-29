@@ -19,7 +19,7 @@ class Bullet:
         self.change_x = self.bullet_x - self.mouse_x
         self.change_y = self.bullet_y - self.mouse_y
         # self.speed = (self.bullet_x - self.change_x) / 1 + (self.bullet_y - self.change_y)
-        self.speed = 25
+        self.speed = 50
     def move(self):
         self.bullet_x -= self.change_x // self.speed
         self.bullet_y -= self.change_y // self.speed
