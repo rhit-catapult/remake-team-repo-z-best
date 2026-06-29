@@ -14,11 +14,20 @@ tile_floor = pygame.transform.scale(tile_floor_raw,(TILE_SIZE,TILE_SIZE))
 tile_wall_raw = pygame.image.load(("brick_wall.png")).convert()
 tile_wall = pygame.transform.scale(tile_wall_raw, (TILE_SIZE,TILE_SIZE))
 tile_grass = pygame.image.load(("grass-tile.png"))
+tile_
 
 
 # 自定义地图：0草地，1石头
 map_data = [
-    [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    [1,1,0,0,0,0,0,0,0,0,0,1,1]
+    [1,1,0,0,0,0,0,0,0,0,0,1,1]
+    [1,1,0,0,0,0,0,0,0,0,0,1,1]
+    [1,1,0,0,0,0,0,0,0,0,0,1,1]
+    [1,1,0,0,0,0,0,0,0,3,3,1,1]
+    [1,1,0,0,0,0,0,0,0,3,3,1,1]
+    [1,1,0,0,0,0,0,0,0,3,3,1,1]
+    [1,1,1,1,1,1,1,1,1,1,1,1,1]
+    
     
 ]
 
@@ -40,7 +49,7 @@ while running:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             running = False
-            
+
     screen.fill((0,0,0))
     draw_tile_map()
     pygame.display.flip()
