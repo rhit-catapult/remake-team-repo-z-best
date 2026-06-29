@@ -30,7 +30,15 @@ class Rooms:
         self.room_5 = pygame.transform.scale(self.room_5, (630, 758))
         self.room_6 = pygame.image.load("room6.png")
         self.room_6 = pygame.transform.scale(self.room_6, (630, 758))
-        self.level_counter = 6
+        self.room_7 = pygame.image.load("room7.png")
+        self.room_7 = pygame.transform.scale(self.room_7, (630, 758))
+        self.room_8 = pygame.image.load("room8.png")
+        self.room_8 = pygame.transform.scale(self.room_8, (630, 758))
+        self.room_9 = pygame.image.load("room9.png")
+        self.room_9 = pygame.transform.scale(self.room_9, (630, 758))
+        self.room_10 = pygame.image.load("room10.png")
+        self.room_10 = pygame.transform.scale(self.room_10, (630, 758))
+        self.level_counter = 10
 
     def draw(self):
         if self.level_counter is 1:
@@ -53,7 +61,6 @@ class Rooms:
             self.screen.blit(self.room_3,(self.screen.get_width() / 2 - self.room_3.get_width() / 2, self.screen.get_height() / 2 - self.room_3.get_height() / 2))
             self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
             self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
-
         if self.level_counter is 6:
             self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
             self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
@@ -61,7 +68,39 @@ class Rooms:
             self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
             self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
             self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
-
+        if self.level_counter is 7:
+            self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
+            self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
+            self.screen.blit(self.room_3,(self.screen.get_width() / 2 - self.room_3.get_width() / 2, self.screen.get_height() / 2 - self.room_3.get_height() / 2))
+            self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
+            self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
+            self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
+        if self.level_counter is 8:
+            self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
+            self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
+            self.screen.blit(self.room_3,(self.screen.get_width() / 2 - self.room_3.get_width() / 2, self.screen.get_height() / 2 - self.room_3.get_height() / 2))
+            self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
+            self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
+            self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
+        if self.level_counter is 9:
+            self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
+            self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
+            self.screen.blit(self.room_3,(self.screen.get_width() / 2 - self.room_3.get_width() / 2, self.screen.get_height() / 2 - self.room_3.get_height() / 2))
+            self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
+            self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
+            self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
+        if self.level_counter is 10:
+            self.screen.blit(self.room_1,(self.screen.get_width() / 2 - self.room_1.get_width() / 2, self.screen.get_height() / 2 - self.room_1.get_height() / 2))
+            self.screen.blit(self.room_2,(self.screen.get_width() / 2 - self.room_2.get_width() / 2, self.screen.get_height() / 2 - self.room_2.get_height() / 2))
+            self.screen.blit(self.room_3,(self.screen.get_width() / 2 - self.room_3.get_width() / 2, self.screen.get_height() / 2 - self.room_3.get_height() / 2))
+            self.screen.blit(self.room_4,(self.screen.get_width() / 2 - self.room_4.get_width() / 2, self.screen.get_height() / 2 - self.room_4.get_height() / 2))
+            self.screen.blit(self.room_5,(self.screen.get_width() / 2 - self.room_5.get_width() / 2, self.screen.get_height() / 2 - self.room_5.get_height() / 2))
+            self.screen.blit(self.room_6,(self.screen.get_width() / 2 - self.room_6.get_width() / 2, self.screen.get_height() / 2 - self.room_6.get_height() / 2))
+            self.screen.blit(self.room_7,(self.screen.get_width() / 2 - self.room_7.get_width() / 2, self.screen.get_height() / 2 - self.room_7.get_height() / 2))
+            self.screen.blit(self.room_8,(self.screen.get_width() / 2 - self.room_8.get_width() / 2, self.screen.get_height() / 2 - self.room_8.get_height() / 2))
+            self.screen.blit(self.room_9,(self.screen.get_width() / 2 - self.room_9.get_width() / 2, self.screen.get_height() / 2 - self.room_9.get_height() / 2))
+            self.screen.blit(self.room_10,(self.screen.get_width() / 2 - self.room_10.get_width() / 2, self.screen.get_height() / 2 - self.room_10.get_height() / 2))
+            
 
 
 def main():
