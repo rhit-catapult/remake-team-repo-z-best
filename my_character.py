@@ -13,6 +13,9 @@ class MainC:
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.bullets = []
         self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
+        self.hp = 4
+        self.last_hit_time = 0
+        self.radius = 40   # adjust to match your sprite size
 
     def update_angle(self):
         dx = self.mouse_x - self.x
