@@ -23,13 +23,12 @@ tile_wall = pygame.transform.scale(tile_wall_raw, (TILE_SIZE,TILE_SIZE))
 tile_grass_raw = pygame.image.load(("grass-tile.png"))
 tile_grass = pygame.transform.scale(tile_grass_raw, (TILE_SIZE, TILE_SIZE))
 
-box_raw = pygame.image.load(("box.png"))
+box_raw = pygame.image.load(("box.png")).convert_alpha()
 box = pygame.transform.scale(box_raw,(TILE_SIZE,TILE_SIZE))
 
-#corpse_raw = pygame.image.load(())
-#corpse = pygame.transform.scale(corpse_raw, (CORPSE_SIZE, TILE_SIZE))
+corpse_raw = pygame.image.load(("dead_Zombie.png")).convert_alpha()
+corpse = pygame.transform.scale(corpse_raw, (CORPSE_SIZE, TILE_SIZE))
 
-#tile_box = 
 
 
 # 自定义地图：0草地，1石头
@@ -45,9 +44,10 @@ map_data = [
 ]
 
 items = [
-    (3, 3, 10),  # (row, column, item_type)
-    # (7, 5, 20)
+    (6, 10, 10),  # (row, column, item_type)
+    (6, 5, 20)
 ]
+
 
 def draw_tile_map():
     for row_idx, row in enumerate(map_data):
@@ -70,8 +70,8 @@ def draw_items():
 
         if item_type == 10:
             screen.blit(box, (x, y))
-        #elif item_type == 20:
-            #screen.blit(corpse,(x,y))
+        elif item_type == 20:
+            screen.blit(corpse, (x, y))
 
             
 
