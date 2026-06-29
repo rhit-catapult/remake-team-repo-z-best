@@ -1,7 +1,6 @@
 import pygame
 import sys
 import random
-import time
 import math
 from healthbar import HealthBar
 from map import Map
@@ -9,17 +8,42 @@ from peanut_bullet_module import Bullet
 from my_character import MainC
 from zombie_module import Zombie
 
+
+def spawn_zombies(screen, player, count=5):
+    zombies = []
+    for _ in range(count):
+        while True:
+            x = random.randint(50, 1250)
+            y = random.randint(50, 750)
+
+            dx = player.x - x
+            dy = player.y - y
+            distance = math.hypot(dx, dy)
+
+            # ensure zombie does NOT spawn touching the player
+            if distance > (player.radius + 100):  # safe buffer
+                zombie = Zombie(screen, x, y, "ZombieFIXED.png")
+                zombie.hp = 3  # each zombie takes 3 hits
+                zombies.append(zombie)
+                break
+
+    return zombies
+
+
 def main():
     pygame.init()
     pygame.display.set_caption("peanut apocolypse")
     screen = pygame.display.set_mode((1300, 800))
 
-    player = MainC(screen, 100, 100, "Character_Placeholder.png")
-    zombie = Zombie(screen, 600, 300, "ZombieFIXED.png")
+    player = MainC(screen, 650, 680, "Character_Placeholder.png")
     healthbar = HealthBar(screen)
+
+    # spawn 5 zombies
+    zombies = spawn_zombies(screen, player, 5)
 
     clock = pygame.time.Clock()
     hurt_sound = pygame.mixer.Sound("Roblox - Oof Death (Sound Effect).mp3")
+
     while True:
         clock.tick(60)
 
@@ -27,13 +51,12 @@ def main():
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 player.fire()
 
         pressed_keys = pygame.key.get_pressed()
 
-        ############################# Player Movement ###############################
+        # Player movement
         if pressed_keys[pygame.K_w]:
             player.y -= 5
         if pressed_keys[pygame.K_s]:
@@ -42,35 +65,60 @@ def main():
             player.x -= 5
         if pressed_keys[pygame.K_d]:
             player.x += 5
-        
-        ############################################################################
+        player.x = max(0, min(1300, player.x))
+        player.y = max(0, min(800, player.y))
+
         player.mouse_x, player.mouse_y = pygame.mouse.get_pos()
         player.update_angle()
 
-        zombie.follow_player(player)
         current_time = pygame.time.get_ticks()
 
-# COLLISION CHECK
-        dx = player.x - zombie.x
-        dy = player.y - zombie.y
-        distance = math.hypot(dx, dy)
+        # Update zombies + collision
+        for zombie in zombies:
+            zombie.follow_player(player)
+            zombie.update_angle(player)
 
-        if distance < (player.radius + zombie.radius):
-            if current_time - player.last_hit_time > 1000:
-                player.hp -= 1
-                player.last_hit_time = current_time
-                healthbar.set_hp(player.hp)
-                hurt_sound.play()
-        zombie.update_angle(player)
+            dx = player.x - zombie.x
+            dy = player.y - zombie.y
+            distance = math.hypot(dx, dy)
 
+            if distance < (player.radius + zombie.radius):
+                if current_time - player.last_hit_time > 1000:
+                    player.hp -= 1
+                    player.last_hit_time = current_time
+                    healthbar.set_hp(player.hp)
+                    hurt_sound.play()
+
+        # Drawing
         screen.fill((255, 255, 255))
-        for bullet in player.bullets:
+
+        # Bullet → Zombie collision
+        for bullet in player.bullets[:]:
             bullet.move()
             bullet.draw()
 
+            for zombie in zombies[:]:
+                dx = bullet.bullet_x - zombie.x
+                dy = bullet.bullet_y - zombie.y
+                distance = math.hypot(dx, dy)
+
+                if distance < zombie.radius:   # bullet hit zombie
+                    zombie.hp -= 1
+                    player.bullets.remove(bullet)
+
+                    if zombie.hp <= 0:
+                        zombies.remove(zombie)
+
+                    break  # stop checking other zombies for this bullet
+
         player.draw()
-        zombie.draw()
+
+        for zombie in zombies:
+            zombie.draw()
+
         healthbar.draw()
+
         pygame.display.update()
+
 
 main()
