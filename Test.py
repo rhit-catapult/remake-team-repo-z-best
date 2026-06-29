@@ -9,11 +9,21 @@ screen = pygame.display.set_mode((W, H))
 tile_floor_raw = pygame.image.load(("White_Tile.png")).convert()
 tile_floor = pygame.transform.scale(tile_floor_raw,(TILE_SIZE,TILE_SIZE))
 
+tile_floor_blood_raw = pygame.image.load(("Blood_Tile_fixed.png")).convert()
+tile_floor_blood = pygame.transform.scale(tile_floor_blood_raw,(TILE_SIZE,TILE_SIZE))
+
 
 
 tile_wall_raw = pygame.image.load(("brick_wall.png")).convert()
 tile_wall = pygame.transform.scale(tile_wall_raw, (TILE_SIZE,TILE_SIZE))
-tile_grass = pygame.image.load(("grass-tile.png"))
+
+
+
+tile_grass_raw = pygame.image.load(("grass-tile.png"))
+tile_grass = pygame.transform.scale(tile_grass_raw, (TILE_SIZE, TILE_SIZE))
+
+box_raw = 
+
 #tile_box = 
 
 
@@ -25,7 +35,7 @@ map_data = [
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,3,0,0,0,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1]
 ]
 
@@ -40,6 +50,8 @@ def draw_tile_map():
                 screen.blit(tile_wall, (x, y))
             elif tile_id ==2:
                 screen.blit(tile_grass,(x,y))
+            elif tile_id ==3:
+                screen.blit(tile_floor_blood,(x,y))
 
 clock = pygame.time.Clock()
 running = True
