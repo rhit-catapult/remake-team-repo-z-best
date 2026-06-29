@@ -9,6 +9,27 @@ from my_character import MainC
 from zombie_module import Zombie
 
 
+# ---------------- START SCREEN ---------------- #
+
+def start_screen(screen):
+    start_img = pygame.image.load("START_SCREEN(UPDATE).png").convert_alpha()
+    start_img = pygame.transform.scale(start_img, (1300, 800))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            # CLICK ANYWHERE TO START
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return  # start the game
+
+        screen.blit(start_img, (0, 0))
+        pygame.display.update()
+
+
+# ---------------- ZOMBIE SPAWNING ---------------- #
+
 def spawn_zombies(screen, player, count=5):
     zombies = []
     for _ in range(count):
@@ -20,25 +41,28 @@ def spawn_zombies(screen, player, count=5):
             dy = player.y - y
             distance = math.hypot(dx, dy)
 
-            # ensure zombie does NOT spawn touching the player
             if distance > (player.radius + 100):  # safe buffer
                 zombie = Zombie(screen, x, y, "ZombieFIXED.png")
-                zombie.hp = 3  # each zombie takes 3 hits
+                zombie.hp = 3  # 3 hits to kill
                 zombies.append(zombie)
                 break
 
     return zombies
 
 
+# ---------------- MAIN GAME ---------------- #
+
 def main():
     pygame.init()
     pygame.display.set_caption("peanut apocolypse")
     screen = pygame.display.set_mode((1300, 800))
 
+    # Show start screen first
+    start_screen(screen)
+
     player = MainC(screen, 650, 680, "Character_Placeholder.png")
     healthbar = HealthBar(screen)
 
-    # spawn 5 zombies
     zombies = spawn_zombies(screen, player, 5)
 
     clock = pygame.time.Clock()
@@ -65,15 +89,17 @@ def main():
             player.x -= 5
         if pressed_keys[pygame.K_d]:
             player.x += 5
-        player.x = max(0, min(1300, player.x))
-        player.y = max(0, min(800, player.y))
+
+        # Map boundaries
+        player.x = max(player.radius, min(1300 - player.radius, player.x))
+        player.y = max(player.radius, min(800 - player.radius, player.y))
 
         player.mouse_x, player.mouse_y = pygame.mouse.get_pos()
         player.update_angle()
 
         current_time = pygame.time.get_ticks()
 
-        # Update zombies + collision
+        # Zombie movement + collision with player
         for zombie in zombies:
             zombie.follow_player(player)
             zombie.update_angle(player)
@@ -102,7 +128,7 @@ def main():
                 dy = bullet.bullet_y - zombie.y
                 distance = math.hypot(dx, dy)
 
-                if distance < zombie.radius:   # bullet hit zombie
+                if distance < zombie.radius:
                     zombie.hp -= 1
                     player.bullets.remove(bullet)
 
