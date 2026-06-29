@@ -23,10 +23,10 @@ tile_wall = pygame.transform.scale(tile_wall_raw, (TILE_SIZE,TILE_SIZE))
 tile_grass_raw = pygame.image.load(("grass-tile.png"))
 tile_grass = pygame.transform.scale(tile_grass_raw, (TILE_SIZE, TILE_SIZE))
 
-box_raw = pygame.image.load(("box.png"))
+box_raw = pygame.image.load(("box.png")).convert_alpha()
 box = pygame.transform.scale(box_raw,(TILE_SIZE,TILE_SIZE))
 
-corpse_raw = pygame.image.load(())
+corpse_raw = pygame.image.load(("dead_Zombie.png")).convert_alpha()
 corpse = pygame.transform.scale(corpse_raw, (CORPSE_SIZE, TILE_SIZE))
 
 #tile_box = 
@@ -45,9 +45,8 @@ map_data = [
 ]
 
 items = [
-    (7,7,10),
-    (7,5,20)
-    
+    (11, 6, 10),  # (row, column, item_type)
+    (5, 6, 20)
 ]
 
 def draw_tile_map():
@@ -65,14 +64,14 @@ def draw_tile_map():
                 screen.blit(tile_floor_blood,(x,y))
 
 def draw_items():
-    for col,row, item_type in items:
-        x = col *TILE_SIZE
-        y = row *TILE_SIZE
+    for row, col, item_type in items:
+        x = col * TILE_SIZE
+        y = row * TILE_SIZE
 
         if item_type == 10:
-            screen.blit(box,(x,y))
+            screen.blit(box, (x, y))
         elif item_type == 20:
-            screen.blit(corpse,(x,y))
+            screen.blit(corpse, (x, y))
 
             
 
