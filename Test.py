@@ -6,7 +6,7 @@ W, H = 1300,800
 screen = pygame.display.set_mode((W, H))
 
 # 加载两种瓦片
-tile_floor_raw = pygame.image.load(("White_Floor_Tile.png")).convert()
+tile_floor_raw = pygame.image.load(("White_Tile.png")).convert()
 tile_floor = pygame.transform.scale(tile_floor_raw,(TILE_SIZE,TILE_SIZE))
 
 

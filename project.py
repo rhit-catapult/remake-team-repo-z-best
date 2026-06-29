@@ -19,7 +19,7 @@ def main():
     healthbar = HealthBar(screen)
 
     clock = pygame.time.Clock()
-
+    hurt_sound = pygame.mixer.Sound("Roblox - Oof Death (Sound Effect).mp3")
     while True:
         clock.tick(60)
 
@@ -60,6 +60,7 @@ def main():
                 player.hp -= 1
                 player.last_hit_time = current_time
                 healthbar.set_hp(player.hp)
+                hurt_sound.play()
         zombie.update_angle(player)
 
         screen.fill((255, 255, 255))
