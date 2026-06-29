@@ -45,8 +45,8 @@ map_data = [
 ]
 
 items = [
-    (6, 12, 10),  # (row, column, item_type)
-    (5, 4, 20)
+    (11, 6, 10),  # (row, column, item_type)
+    (5, 6, 20)
 ]
 
 def draw_tile_map():
@@ -65,13 +65,13 @@ def draw_tile_map():
 
 def draw_items():
     for row, col, item_type in items:
-        x = row * TILE_SIZE
-        y = col * TILE_SIZE
+        x = col * TILE_SIZE
+        y = row * TILE_SIZE
 
         if item_type == 10:
             screen.blit(box, (x, y))
         elif item_type == 20:
-            screen.blit(corpse,(x,y))
+            screen.blit(corpse, (x, y))
 
             
 
