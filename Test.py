@@ -64,7 +64,7 @@ player_y = TILE_SIZE*2
 #解锁弹窗状态
 is_unlocked = False
 show_popup = False
-popup_font = pygame.font. SysFont(None,48)
+popup_font = pygame.font.Font(None, 48)
 
 #时钟
 clock = pygame.time.Clock()
@@ -101,10 +101,10 @@ def draw_popup():
     overlay.fill((0, 0, 0, 180))
     screen.blit(overlay,(0,0))
 
-text_line1 = popup_font.render("Press E to Unlock Full Map Content")
-text_line2 = popup_font.render("Before unlock: Only backgroundimage displays",True, (220, 220, 220))
-screen.blit(text_line1, (W//2 - text_line1.get_width()//2, H//2 - 40))
-screen.blit(text_line2, (W//2 - text_line2.get_width()//2, H//2 + 10))
+    text_line1 = popup_font.render("Press E to Unlock Full Map Content", True, (220, 220, 220))
+    text_line2 = popup_font.render("Before unlock: Only backgroundimage displays",True, (220, 220, 220))
+    screen.blit(text_line1, (W//2 - text_line1.get_width()//2, H//2 - 40))
+    screen.blit(text_line2, (W//2 - text_line2.get_width()//2, H//2 + 10))
 
 #墙体碰撞检测
 def is_wall_collision(x, y, w, h):
@@ -150,7 +150,7 @@ def player_movement():
 
     
 def draw_player():
-    screen.blit(player_x,player_y)
+    screen.blit(player, (player_x,player_y))
 
 
 while running:
@@ -159,7 +159,9 @@ while running:
             running = False
         
         if event.type == pygame.KEYDOWN:
+            print(f"Key pressed: {event.key}, show_popup: {show_popup}, pygame.K_e: {pygame.K_e}")
             if show_popup and event.key == pygame.K_e:
+                print("UNLOCKING!")
                 is_unlocked = True
                 show_popup= False
 
@@ -167,7 +169,10 @@ while running:
     trigger_pos_x = TILE_SIZE*6
     trigger_pos_y = TILE_SIZE*6
     if not is_unlocked and not show_popup:
-        if abs(player_x - trigger_pos_x) < TILE_SIZE and abs(player_y-trigger_pos_y) < TILE_SIZE:
+        distance_x = abs(player_x - trigger_pos_x)
+        distance_y = abs(player_y - trigger_pos_y)
+        if distance_x < TILE_SIZE and distance_y < TILE_SIZE:
+            print(f"POPUP TRIGGERED! Player at ({player_x}, {player_y})")
             show_popup = True
 
     if not show_popup:
