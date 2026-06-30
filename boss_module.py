@@ -18,7 +18,7 @@ class boss:
         self.image = self.final_image
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.hp = hp
-        self.radius = size * 20
+        self.radius = (self.final_image.get_width() / 2) + 2
     def follow_player(self, player, speed=2):
         # Move toward the player slowly
         dx = player.x - self.x
@@ -50,9 +50,9 @@ class boss:
 
 def test_character():
     screen = pygame.display.set_mode((1300, 800))
-    Jose = boss(screen, 200, 400, "Boss_Jose.png", 5, 4)
-    Autumn = boss(screen, 600, 400,"Boss_Autum.png", 5, 5)
-    Ethan = boss(screen, 1000, 400, "Boss_Ethan.png", 5, 7)
+    Jose = boss(screen, 200, 400, "Boss_Jose.png", 20, 4)
+    Autumn = boss(screen, 600, 400,"Boss_Autum.png", 35, 5.5)
+    Ethan = boss(screen, 1000, 400, "Boss_Ethan.png", 50, 7)
     zombie = boss(screen, 100, 100, "Boss_Jose.png", 5, 2)
     while True:
         for event in pygame.event.get():

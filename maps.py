@@ -1,0 +1,37 @@
+"""Map data and configuration"""
+
+# Map 1: Bottom map with wall boundary
+map_data_1 = [
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1],
+]
+
+# Map 2: Top map (accessible after unlock)
+map_data_2 = [
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+]
+
+# Combine maps: map_data_2 on top, map_data_1 on bottom
+full_world_map = map_data_2 + map_data_1
+map2_rows_count = len(map_data_2)
+map1_start_row = map2_rows_count
+
+# Items: (row, column, item_type)
+# 10=box, 20=corpse
+items = [
+    (map1_start_row + 6, 9, 10),  # Box in map1
+    (map1_start_row + 6, 6, 20)   # Corpse in map1
+]
