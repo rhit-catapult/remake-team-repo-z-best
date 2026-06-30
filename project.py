@@ -95,7 +95,7 @@ def draw_map(screen, view_offset_x, view_offset_y, is_unlocked):
                 tile_img = TILE_SPRITES[tile_id].copy()
                 # Darken map2 if locked
                 if row_idx < map2_rows_count and not is_unlocked:
-                    tile_img.set_alpha(60)
+                    tile_img.set_alpha(40)
                 screen.blit(tile_img, (screen_x, screen_y))
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
@@ -296,6 +296,10 @@ def main():
             zombies = spawn_zombies(screen, player, 5)
 
         healthbar.draw()
+
+        # Draw popup if triggered
+        if show_popup:
+            draw_popup(screen)
 
         # ---------------- DRAW LEVEL TEXT ---------------- #
         level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
