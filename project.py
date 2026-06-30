@@ -3,10 +3,9 @@ import sys
 import random
 import math
 from healthbar import HealthBar
-from map import Map
-from peanut_bullet_module import Bullet
 from my_character import MainC
 from zombie_module import Zombie
+from map import Map
 from map import Rooms
 
 
@@ -89,7 +88,7 @@ def main():
     hurt_sound = pygame.mixer.Sound("Roblox - Oof Death (Sound Effect).mp3")
 
     while True:
-        clock.tick(60)
+        clock.tick(100)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
