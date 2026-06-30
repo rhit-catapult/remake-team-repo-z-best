@@ -22,7 +22,7 @@ def start_screen(screen):
 
             # CLICK ANYWHERE TO START
             if event.type == pygame.MOUSEBUTTONDOWN:
-                return  # start the game
+                return  # start the game/
 
         screen.blit(start_img, (0, 0))
         pygame.display.update()
