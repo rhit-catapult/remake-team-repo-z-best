@@ -145,7 +145,7 @@ def main():
     view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
     is_unlocked = False
     show_popup = False
-    trigger_pos = (TILE_SIZE * 6, TILE_SIZE * (map1_start_row) + 1)
+    trigger_pos = (player.x, TILE_SIZE * map1_start_row + 200)  # Trigger above player spawn
 
     zombies = spawn_zombies(screen, player, 5)
 
