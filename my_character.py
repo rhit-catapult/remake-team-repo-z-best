@@ -37,7 +37,7 @@ class MainC:
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.mouse_x - crosshair_height / 2, self.mouse_y - crosshair_width / 2, crosshair_height, crosshair_width))
 
     def fire(self):
-        self.bullets.append(peanut_bullet_module.Bullet(self.screen, self.x, self.y))
+        self.bullets.append(peanut_bullet_module.Bullet(self.screen, self.x, self.y, self.mouse_x, self.mouse_y))
 
 
 def test_character():

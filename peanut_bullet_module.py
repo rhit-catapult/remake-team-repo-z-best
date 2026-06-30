@@ -7,13 +7,13 @@ import my_character
 
 
 class Bullet:
-    def __init__(self, screen: pygame.Surface, hero_x, hero_y):
+    def __init__(self, screen: pygame.Surface, hero_x, hero_y, mouse_x, mouse_y):
         self.screen = screen
         self.peanut = pygame.image.load("Peanut_bullet.png")
         scale = 0.2
         self.peanut = pygame.transform.scale(self.peanut, (self.peanut.get_width() * scale, self.peanut.get_height() * scale))
-        self.mouse_x = pygame.mouse.get_pos()[0]
-        self.mouse_y = pygame.mouse.get_pos()[1]
+        self.mouse_x = mouse_x
+        self.mouse_y = mouse_y
         self.bullet_x = hero_x
         self.bullet_y = hero_y
         self.change_x = self.bullet_x - self.mouse_x
