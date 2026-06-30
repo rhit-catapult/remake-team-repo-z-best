@@ -6,19 +6,17 @@ CORPSE_SIZE = 200
 W, H = 1300, 800
 screen = pygame.display.set_mode((W, H))
 
-VIEW_COLS = W //TILE_SIZE
-VIEW_ROWS = H //TILE_SIZE
-
+VIEW_COLS = W // TILE_SIZE
+VIEW_ROWS = H // TILE_SIZE
 
 view_offset_x = 0
 view_offset_y = 0
 
-def load_image(path, size, use_alpha = False):
-    method = "convert_alpha" if use_alpha else"convert"
+def load_image(path, size, use_alpha=False):
+    method = "convert_alpha" if use_alpha else "convert"
     img = pygame.image.load(path)
     img = getattr(img, method)()
     return pygame.transform.scale(img, size)
-
 
 # Load sprites
 tile_floor = load_image("White_Tile.png", (TILE_SIZE, TILE_SIZE))
@@ -34,17 +32,16 @@ player = load_image("Character_Placeholder.png", (TILE_SIZE, TILE_SIZE), use_alp
 # Tile ID to sprite mapping
 TILE_SPRITES = {0: tile_floor, 1: tile_wall, 2: tile_grass, 3: tile_floor_blood}
 
-
-# 自定义地图：0草地，1石头
+# 两张地图：map_data2在上，map_data1拼接在下方（图1在图2下面）
 map_data_1 = [
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,3,0,0,0,1,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1]
+    [1,1,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1],
 ]
 
 map_data_2 = [
@@ -54,16 +51,19 @@ map_data_2 = [
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,3,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1]
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
 ]
+
+# 拼接总地图：map_data2在上，map_data1在下
+full_world_map = map_data_2 + map_data_1
 
 # Item types: 10=box, 20=corpse
 ITEM_SPRITES = {10: box, 20: corpse}
 
-#玩家初始位置
-player_x = TILE_SIZE * 2
-player_y = TILE_SIZE * 2
+#玩家初始位置，调整坐标防止出生在墙里/地图外
+player_x = TILE_SIZE * 6
+player_y = TILE_SIZE * 3
 
 # Items: (row, column, item_type)
 items = [(6, 9, 10), (6, 6, 20)]
@@ -79,110 +79,111 @@ running = True
 
 def draw_tile_map():
     global view_offset_x, view_offset_y
-    full_map = map_data_1 + map_data_2  # Combine maps vertically
-
     start_col = int(view_offset_x)
     start_row = int(view_offset_y)
 
     for row_idx in range(start_row, start_row + VIEW_ROWS + 1):
-        if row_idx < 0 or row_idx >=len (full_map):
+        if row_idx < 0 or row_idx >= len(full_world_map):
             continue
-        row = full_map[row_idx]
+        row = full_world_map[row_idx]
         for col_idx in range(start_col, start_col + VIEW_COLS + 1):
             if col_idx < 0 or col_idx >= len(row):
                 continue
-            tile_id = row [col_idx]
+            tile_id = row[col_idx]
             screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
             screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
             screen.blit(TILE_SPRITES[tile_id], (screen_x, screen_y))
-
 
 def draw_items():
     global view_offset_x, view_offset_y
     for row, col, item_type in items:
         screen_x = col * TILE_SIZE - view_offset_x * TILE_SIZE
         screen_y = row * TILE_SIZE - view_offset_y * TILE_SIZE
-        screen.blit (ITEM_SPRITES[item_type], (screen_x, screen_y))
+        screen.blit(ITEM_SPRITES[item_type], (screen_x, screen_y))
 
 def draw_popup():
-    """Draw semi-transparent overlay with unlock message"""
     overlay = pygame.Surface((W, H), pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 180))
+    overlay.fill((0, 0, 180, 150))
     screen.blit(overlay, (0, 0))
-    
+
     text1 = popup_font.render("Press E to Unlock Full Map Content", True, (220, 220, 220))
     text2 = popup_font.render("Before unlock: Only background image displays", True, (220, 220, 220))
-    screen.blit(text1, (W//2 - text1.get_width()//2, H//2 - 40))
-    screen.blit(text2, (W//2 - text2.get_width()//2, H//2 + 10))
+    screen.blit(text1, (W/2 - text1.get_width()/2, H/2 - 40))
+    screen.blit(text2, (W/2 - text2.get_width()/2, H/2 + 10))
 
-#墙体碰撞检测
+#墙体碰撞检测 使用拼接后的完整地图
 def is_wall_collision(x, y, w, h):
     left_col = int(x // TILE_SIZE)
     right_col = int((x + w - 1) // TILE_SIZE)
     top_row = int(y // TILE_SIZE)
     bottom_row = int((y + h - 1) // TILE_SIZE)
-    full_map = map_data_1 + map_data_2
 
     for r in range(top_row, bottom_row + 1):
-       if r < 0 or r>=len(full_map):
-           continue
-       for c in range(left_col, right_col + 1):
-           if c < 0 or c >=len(full_map[r]):
-               continue
-           if full_map[r][c] ==1:
-               return True
+        if r < 0 or r >= len(full_world_map):
+            continue
+        for c in range(left_col, right_col + 1):
+            if c < 0 or c >= len(full_world_map[r]):
+                continue
+            if full_world_map[r][c] == 1:
+                return True
     return False
 
 #窗口边界检测
 def is_out_of_screen(x, y, w, h):
-    return x < 0 or y < 0 or (x + w) > W or (y + h) > H
+    map_width = len(full_world_map[0]) * TILE_SIZE
+    map_height = len(full_world_map) * TILE_SIZE
+    return x < 0 or y < 0 or (x + w) > map_width or (y + h) > map_height
 
 def player_movement():
-    global player_x, player_y
+    global player_x, player_y, view_offset_x, view_offset_y
     keys = pygame.key.get_pressed()
-    
-    # Key to movement mapping
-    moves = [
-        (pygame.K_UP, 0, -PLAYER_SPEED),
-        (pygame.K_DOWN, 0, PLAYER_SPEED),
-        (pygame.K_LEFT, -PLAYER_SPEED, 0),
-        (pygame.K_RIGHT, PLAYER_SPEED, 0)
-    ]
-    
-    for key, dx, dy in moves:
-        if keys[key]:
-            new_x = player_x + dx
-            new_y = player_y + dy
-            if not is_wall_collision(new_x, new_y, TILE_SIZE, TILE_SIZE) and not is_out_of_screen(new_x, new_y, TILE_SIZE, TILE_SIZE):
-                player_x = new_x
-                player_y = new_y
+    dx, dy = 0, 0
 
-               # 相机跟随玩家居中，实现视野扩张
-            view_offset_x = player_x / TILE_SIZE - VIEW_COLS / 2
-            view_offset_y = player_y / TILE_SIZE - VIEW_ROWS / 2
+    if keys[pygame.K_UP]:
+        dy -= PLAYER_SPEED
+    if keys[pygame.K_DOWN]:
+        dy += PLAYER_SPEED
+    if keys[pygame.K_LEFT]:
+        dx -= PLAYER_SPEED
+    if keys[pygame.K_RIGHT]:
+        dx += PLAYER_SPEED
 
-            # 限制相机不超出整张地图边界，防止黑边
-            full_map = map_data_1 + map_data_2
-            max_view_col = len(full_map[0]) - VIEW_COLS
-            max_view_row = len(full_map) - VIEW_ROWS
-            view_offset_x = max(0, min(view_offset_x, max_view_col))
-            view_offset_y = max(0, min(view_offset_y, max_view_row))
-    
+    # 单独X轴移动检测碰撞
+    new_x = player_x + dx
+    if not is_wall_collision(new_x, player_y, TILE_SIZE, TILE_SIZE) and not is_out_of_screen(new_x, player_y, TILE_SIZE, TILE_SIZE):
+        player_x = new_x
+
+    # 单独Y轴移动检测碰撞
+    new_y = player_y + dy
+    if not is_wall_collision(player_x, new_y, TILE_SIZE, TILE_SIZE) and not is_out_of_screen(player_x, new_y, TILE_SIZE, TILE_SIZE):
+        player_y = new_y
+
+    # 相机跟随玩家居中
+    view_offset_x = player_x / TILE_SIZE - VIEW_COLS / 2
+    view_offset_y = player_y / TILE_SIZE - VIEW_ROWS / 2
+
+    # 锁定相机边界，不超出整张地图
+    max_view_col = len(full_world_map[0]) - VIEW_COLS
+    max_view_row = len(full_world_map) - VIEW_ROWS
+    view_offset_x = max(0, min(view_offset_x, max_view_col))
+    view_offset_y = max(0, min(view_offset_y, max_view_row))
+
 def draw_player():
     screen_x = player_x - view_offset_x * TILE_SIZE
     screen_y = player_y - view_offset_y * TILE_SIZE
     screen.blit(player, (screen_x, screen_y))
 
-
+#主循环
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        # 修复按键判断语法错误
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
             is_unlocked = True
             show_popup = False
 
-    # Check trigger zone for popup
+    # 弹窗触发区域
     trigger_pos = (TILE_SIZE * 6, TILE_SIZE * 6)
     if not is_unlocked and not show_popup:
         if abs(player_x - trigger_pos[0]) < TILE_SIZE and abs(player_y - trigger_pos[1]) < TILE_SIZE:
@@ -191,22 +192,22 @@ while running:
     if not show_popup:
         player_movement()
 
-    # Render
+    #渲染
     screen.fill((0, 0, 0))
-    
+
     if is_unlocked:
         draw_tile_map()
         draw_items()
-    
+
     draw_player()
+
     if show_popup:
         draw_popup()
 
     pygame.display.flip()
     clock.tick(60)
 
-pygame.quit() 
-
+pygame.quit()
 
 
 
