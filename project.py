@@ -6,6 +6,7 @@ from healthbar import HealthBar
 from my_character import MainC
 from zombie_module import Zombie
 from map import Rooms
+from maps import full_world_map, map_data_1, map_data_2, map2_rows_count, map1_start_row, items
 
 
 
