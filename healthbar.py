@@ -6,11 +6,11 @@ class HealthBar:
 
         # Load your premade PNGs
         self.images = [
-            pygame.image.load("0Health.png"),  # 0 HP
-            pygame.image.load("1Health.png"),  # 1 HP
-            pygame.image.load("2Health.png"),  # 2 HP
-            pygame.image.load("3Health.png"),  # 3 HP
-            pygame.image.load("4Health.png"),  # 4 HP
+            pygame.image.load("0hearts.png"),  # 0 HP
+            pygame.image.load("1hearts.png"),  # 1 HP
+            pygame.image.load("2hearts.png"),  # 2 HP
+            pygame.image.load("3hearts.png"),  # 3 HP
+            pygame.image.load("4hearts.png"),  # 4 HP
         ]
 
         self.hp = 4  # start full health
