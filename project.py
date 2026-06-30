@@ -166,10 +166,10 @@ def main():
             zombie.draw()
 
         healthbar.draw()
-        big_r = Map(screen)
-        room_5 = Rooms(screen, 5)
-        big_r.draw()
-        room_5.draw()
+        # big_r = Map(screen)
+        # room_5 = Rooms(screen, 5)
+        # big_r.draw()
+        # room_5.draw()
         pygame.display.update()
 
 
