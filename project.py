@@ -221,8 +221,8 @@ def main():
         screen.fill((255, 255, 255))
         
         # Draw map first
-        draw_map(screen)
-        draw_map_items(screen)
+        draw_map(screen, view_offset_x, view_offset_y)
+        draw_map_items(screen, view_offset_x, view_offset_y)
 
         # Bullet → Zombie collision
         for bullet in player.bullets[:]:
@@ -253,6 +253,11 @@ def main():
         #room_5 = Rooms(screen, 5)
         #big_r.draw()
         #room_5.draw()
+        
+        # Draw popup if needed
+        if show_popup:
+            draw_popup(screen)
+        
         pygame.display.update()
 
 
