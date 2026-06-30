@@ -74,7 +74,7 @@ def spawn_zombies(screen, player, count=5):
 
 # ---------------- MAP RENDERING ---------------- #
 
-def draw_map(screen, view_offset_x, view_offset_y):
+def draw_map(screen, view_offset_x, view_offset_y, is_unlocked):
     """Draw the complete map with camera offset"""
     view_cols = 1300 // TILE_SIZE
     view_rows = 800 // TILE_SIZE
@@ -92,7 +92,11 @@ def draw_map(screen, view_offset_x, view_offset_y):
             if tile_id in TILE_SPRITES:
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
-                screen.blit(TILE_SPRITES[tile_id], (screen_x, screen_y))
+                tile_img = TILE_SPRITES[tile_id].copy()
+                # Darken map2 if locked
+                if row_idx < map2_rows_count and not is_unlocked:
+                    tile_img.set_alpha(100)
+                screen.blit(tile_img, (screen_x, screen_y))
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
     """Draw items on the map with camera offset"""
@@ -234,7 +238,7 @@ def main():
         screen.fill((255, 255, 255))
         
         # Draw map first
-        draw_map(screen, view_offset_x, view_offset_y)
+        draw_map(screen, view_offset_x, view_offset_y, is_unlocked)
         draw_map_items(screen, view_offset_x, view_offset_y)
 
         # Bullet → Zombie collision
