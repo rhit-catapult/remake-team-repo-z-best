@@ -3,6 +3,35 @@ import math
 import sys
 from zombie_module import Zombie
 
+class level_title:
+    def __init__(self, screen, room_number):
+        self.screen = screen
+        self.level = room_number
+    def draw(self):
+        self.screen.blit((pygame.image.load("level.png")),(800,0))
+        if self.level is 1:
+            image_filename = ("1.png")
+        if self.level is 2:
+            image_filename = ("2.png")
+        if self.level is 3:
+            image_filename = ("3.png")
+        if self.level is 5:
+            image_filename = ("5.png")
+        if self.level is 6:
+            image_filename = ("6.png")
+        if self.level is 8:
+            image_filename = ("8.png")
+        if self.level is 9:
+            image_filename = ("9.png")
+        if self.level is 1 or 2 or 3 or 5 or 6 or 8 or 9:
+            self.x = 955
+            self.y = 100
+        else:
+            self.x = 0
+            self.y = 0
+        self.screen.blit(pygame.image.load(image_filename), (self.x, self.y))
+
+
 class boss:
     def __init__(self, screen, x, y, image_filename, hp, size):
         self.screen = screen            
@@ -54,6 +83,7 @@ def test_character():
     Autumn = boss(screen, 600, 400,"Boss_Autum.png", 35, 5.5)
     Ethan = boss(screen, 1000, 400, "Boss_Ethan.png", 50, 7)
     zombie = boss(screen, 100, 100, "Boss_Jose.png", 5, 2)
+    title = level_title(screen, 8)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -64,6 +94,7 @@ def test_character():
         Autumn.draw()
         Ethan.draw()
         zombie.draw()
+        title.draw()
         pygame.display.update()
 
 

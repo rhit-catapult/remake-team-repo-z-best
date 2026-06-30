@@ -6,7 +6,6 @@ from healthbar import HealthBar
 from my_character import MainC
 from zombie_module import Zombie
 from map import Rooms
-from maps import full_world_map, map_data_1, map_data_2, map2_rows_count, map1_start_row, items
 
 
 
@@ -165,17 +164,6 @@ def main():
             zombie.draw()
 
         healthbar.draw()
-<<<<<<< HEAD
-        #big_r = Map(screen)
-        #room_5 = Rooms(screen, 5)
-        #big_r.draw()
-        #room_5.draw()
-=======
-        # big_r = Map(screen)
-        # room_5 = Rooms(screen, 5)
-        # big_r.draw()
-        # room_5.draw()
->>>>>>> #730eab6dc868edb3d235d20d1205f8e9ab1e40bc
         pygame.display.update()
 
 
