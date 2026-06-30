@@ -125,7 +125,7 @@ def main():
     # Show start screen first
     start_screen(screen)
 
-    player = MainC(screen, 650, 680, "Character_Placeholder.png")
+    player = MainC(screen, 650, 950, "Character_Placeholder.png")
     healthbar = HealthBar(screen)
     
     # Camera and map state
