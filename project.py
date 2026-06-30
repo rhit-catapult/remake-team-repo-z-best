@@ -7,10 +7,8 @@ from map import Map
 from peanut_bullet_module import Bullet
 from my_character import MainC
 from zombie_module import Zombie
-#from map import Rooms
+# from map import Rooms
 
-
-LEVELS = 10
 # ---------------- START SCREEN ---------------- #
 
 def start_screen(screen):
@@ -24,10 +22,11 @@ def start_screen(screen):
 
             # CLICK ANYWHERE TO START
             if event.type == pygame.MOUSEBUTTONDOWN:
-                return  # start the game/
+                return  # start the game
 
         screen.blit(start_img, (0, 0))
         pygame.display.update()
+
 
 def death_screen(screen):
     death_img = pygame.image.load("you_died.png").convert_alpha()
@@ -47,6 +46,7 @@ def death_screen(screen):
 
         screen.blit(death_img, (0, 0))
         pygame.display.update()
+
 
 # ---------------- ZOMBIE SPAWNING ---------------- #
 
@@ -73,9 +73,17 @@ def spawn_zombies(screen, player, count=5):
 # ---------------- MAIN GAME ---------------- #
 
 def main():
+    current_level = 1
     pygame.init()
     pygame.display.set_caption("peanut apocolypse")
     screen = pygame.display.set_mode((1300, 800))
+
+    # FONT FOR LEVEL DISPLAY
+    font = pygame.font.SysFont(None, 40)
+
+    # Load level clear PNG AFTER display is created
+    level_clear_img = pygame.image.load("level_complete.png").convert_alpha()
+    level_clear_img = pygame.transform.scale(level_clear_img, (600, 300))
 
     # Show start screen first
     start_screen(screen)
@@ -134,10 +142,12 @@ def main():
                     player.last_hit_time = current_time
                     healthbar.set_hp(player.hp)
                     hurt_sound.play()
+
             if player.hp <= 0:
                 pygame.time.delay(1000)
                 death_screen(screen)
                 return main()  # restart the whole game
+
         # Drawing
         screen.fill((255, 255, 255))
 
@@ -165,18 +175,35 @@ def main():
         for zombie in zombies:
             zombie.draw()
 
+        # ---------------- LEVEL CLEAR CHECK ---------------- #
+        if len(zombies) == 0:
+            # Draw level clear image
+            screen.blit(level_clear_img, (350, 250))
+            pygame.display.update()
+
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit()
+
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_e:
+                            waiting = False
+
+                pygame.time.delay(50)
+
+            # Start next level
+            current_level += 1
+            player.bullets.clear()  # optional but recommended
+            zombies = spawn_zombies(screen, player, 5)
+
         healthbar.draw()
-#<<<<<<< HEAD
-        #big_r = Map(screen)
-        #room_5 = Rooms(screen, 5)
-        #big_r.draw()
-        #room_5.draw()
-#=======
-        # big_r = Map(screen)
-        # room_5 = Rooms(screen, 5)
-        # big_r.draw()
-        # room_5.draw()
-#>>>>>>> 730eab6dc868edb3d235d20d1205f8e9ab1e40bc
+
+        # ---------------- DRAW LEVEL TEXT ---------------- #
+        level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
+        screen.blit(level_text, (20, 760))  # bottom-left corner
+
         pygame.display.update()
 
 
