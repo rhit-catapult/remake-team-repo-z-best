@@ -10,7 +10,7 @@ from zombie_module import Zombie
 #from map import Rooms
 
 
-
+LEVELS = 10
 # ---------------- START SCREEN ---------------- #
 
 def start_screen(screen):
@@ -166,17 +166,17 @@ def main():
             zombie.draw()
 
         healthbar.draw()
-<<<<<<< HEAD
+#<<<<<<< HEAD
         #big_r = Map(screen)
         #room_5 = Rooms(screen, 5)
         #big_r.draw()
         #room_5.draw()
-=======
+#=======
         # big_r = Map(screen)
         # room_5 = Rooms(screen, 5)
         # big_r.draw()
         # room_5.draw()
->>>>>>> 730eab6dc868edb3d235d20d1205f8e9ab1e40bc
+#>>>>>>> 730eab6dc868edb3d235d20d1205f8e9ab1e40bc
         pygame.display.update()
 
 
