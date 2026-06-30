@@ -7,7 +7,7 @@ from map import Map
 from peanut_bullet_module import Bullet
 from my_character import MainC
 from zombie_module import Zombie
-from map import Rooms
+#from map import Rooms
 
 
 
@@ -166,10 +166,17 @@ def main():
             zombie.draw()
 
         healthbar.draw()
-        big_r = Map(screen)
-        room_5 = Rooms(screen, 5)
-        big_r.draw()
-        room_5.draw()
+<<<<<<< HEAD
+        #big_r = Map(screen)
+        #room_5 = Rooms(screen, 5)
+        #big_r.draw()
+        #room_5.draw()
+=======
+        # big_r = Map(screen)
+        # room_5 = Rooms(screen, 5)
+        # big_r.draw()
+        # room_5.draw()
+>>>>>>> 730eab6dc868edb3d235d20d1205f8e9ab1e40bc
         pygame.display.update()
 
 
