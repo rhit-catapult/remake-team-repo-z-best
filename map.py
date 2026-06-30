@@ -15,7 +15,7 @@ class Map:
         self.screen.blit(self.grey_r, (self.screen.get_width() / 2 - self.grey_r.get_width() / 2, self.screen.get_height() / 2 - self.grey_r.get_height() / 2))
 #level_counter = 0
 class Rooms:
-    def __init__(self, screen: pygame.Surface, ):
+    def __init__(self, screen: pygame.Surface):
         self.level_counter = 8
         self.screen = screen
         self.room_1 = pygame.image.load("room1.png")

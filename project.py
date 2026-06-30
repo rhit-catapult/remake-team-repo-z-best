@@ -12,7 +12,7 @@ from zombie_module import Zombie
 # ---------------- START SCREEN ---------------- #
 
 def start_screen(screen):
-    start_img = pygame.image.load("START_SCREEN(UPDATE).png").convert_alpha()
+    start_img = pygame.image.load("Welcome_page.png").convert_alpha()
     start_img = pygame.transform.scale(start_img, (1300, 800))
 
     while True:
