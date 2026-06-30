@@ -57,6 +57,8 @@ map_data_2 = [
 
 # 拼接总地图：map_data2在上，map_data1在下
 full_world_map = map_data_2 + map_data_1
+map2_rows_count = len(map_data_2)
+map1_start_row = map2_rows_count
 
 # Item types: 10=box, 20=corpse
 ITEM_SPRITES = {10: box, 20: corpse}
@@ -66,7 +68,7 @@ player_x = TILE_SIZE * 6
 player_y = TILE_SIZE * 3
 
 # Items: (row, column, item_type)
-items = [(6, 9, 10), (6, 6, 20)]
+items = [( map1_start_row + 6, 9, 10), (map1_start_row + 6, 6, 20)]
 
 #解锁弹窗状态
 is_unlocked = False
@@ -77,7 +79,7 @@ popup_font = pygame.font.Font(None, 48)
 clock = pygame.time.Clock()
 running = True
 
-def draw_tile_map():
+def draw_full_map():
     global view_offset_x, view_offset_y
     start_col = int(view_offset_x)
     start_row = int(view_offset_y)
@@ -85,14 +87,19 @@ def draw_tile_map():
     for row_idx in range(start_row, start_row + VIEW_ROWS + 1):
         if row_idx < 0 or row_idx >= len(full_world_map):
             continue
-        row = full_world_map[row_idx]
+        row_data = full_world_map[row_idx]
         for col_idx in range(start_col, start_col + VIEW_COLS + 1):
-            if col_idx < 0 or col_idx >= len(row):
+            if col_idx < 0 or col_idx >= len(row_data):
                 continue
-            tile_id = row[col_idx]
+            tile_id = row_data[col_idx]
+            tile_img = TILE_SPRITES[tile_id].copy()
+
+            if row_idx < map2_rows_count and not is_unlock_map2:
+                tile_img.set_alpha(60)
+
             screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
             screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
-            screen.blit(TILE_SPRITES[tile_id], (screen_x, screen_y))
+            screen.blit(tile_img, (screen_x, screen_y))
 
 def draw_items():
     global view_offset_x, view_offset_y
@@ -180,12 +187,12 @@ while running:
             running = False
         # 修复按键判断语法错误
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
-            is_unlocked = True
+            is_unlock_map2 = True
             show_popup = False
 
     # 弹窗触发区域
-    trigger_pos = (TILE_SIZE * 6, TILE_SIZE * 6)
-    if not is_unlocked and not show_popup:
+    trigger_pos = (TILE_SIZE * 6, TILE_SIZE * (map1_start_row)+1)
+    if not is_unlock_map2 and not show_popup:
         if abs(player_x - trigger_pos[0]) < TILE_SIZE and abs(player_y - trigger_pos[1]) < TILE_SIZE:
             show_popup = True
 
@@ -195,10 +202,8 @@ while running:
     #渲染
     screen.fill((0, 0, 0))
 
-    if is_unlocked:
-        draw_tile_map()
-        draw_items()
-
+    draw_full_map()
+    draw_items()
     draw_player()
 
     if show_popup:
