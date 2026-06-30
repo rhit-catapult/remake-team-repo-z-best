@@ -12,11 +12,11 @@ class boss:
         self.original_image = pygame.image.load(image_filename).convert_alpha()
         self.hp = hp
 # SCALE THE ZOMBIE
-        scale = size   # 50% size — change this number to whatever you want
+        scale = 5   # 50% size — change this number to whatever you want
         w = self.original_image.get_width()
         h = self.original_image.get_height()
         self.original_image = pygame.transform.scale(self.original_image, (int(w * scale), int(h * scale)))
-        self.radius = size + 30   # adjust to match your zombie sprite size
+        self.radius = size * 80   # adjust to match your zombie sprite size
 
     def follow_player(self, player, speed=2):
         # Move toward the player slowly
