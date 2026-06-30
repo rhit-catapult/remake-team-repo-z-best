@@ -65,7 +65,11 @@ ITEM_SPRITES = {10: box, 20: corpse}
 
 #玩家初始位置，调整坐标防止出生在墙里/地图外
 player_x = TILE_SIZE * 6
-player_y = TILE_SIZE * 3
+player_y = TILE_SIZE * (map1_start_row + 4)
+
+#初始化镜头直接对准出生点
+view_offset_x = player_x / TILE_SIZE - VIEW_COLS /2
+view_offset_y = player_y / TILE_SIZE - VIEW_ROWS/ 2
 
 # Items: (row, column, item_type)
 items = [( map1_start_row + 6, 9, 10), (map1_start_row + 6, 6, 20)]
@@ -94,7 +98,7 @@ def draw_full_map():
             tile_id = row_data[col_idx]
             tile_img = TILE_SPRITES[tile_id].copy()
 
-            if row_idx < map2_rows_count and not is_unlock_map2:
+            if row_idx < map2_rows_count and not is_unlocked:
                 tile_img.set_alpha(60)
 
             screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
@@ -187,12 +191,12 @@ while running:
             running = False
         # 修复按键判断语法错误
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
-            is_unlock_map2 = True
+            is_unlocked = True
             show_popup = False
 
     # 弹窗触发区域
     trigger_pos = (TILE_SIZE * 6, TILE_SIZE * (map1_start_row)+1)
-    if not is_unlock_map2 and not show_popup:
+    if not is_unlocked and not show_popup:
         if abs(player_x - trigger_pos[0]) < TILE_SIZE and abs(player_y - trigger_pos[1]) < TILE_SIZE:
             show_popup = True
 
