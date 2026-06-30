@@ -74,7 +74,7 @@ def spawn_zombies(screen, player, count=5):
 
 # ---------------- MAP RENDERING ---------------- #
 
-def draw_map(screen, view_offset_x, view_offset_y):
+def draw_map(screen, view_offset_x, view_offset_y, is_unlocked):
     """Draw the complete map with camera offset"""
     view_cols = 1300 // TILE_SIZE
     view_rows = 800 // TILE_SIZE
@@ -92,7 +92,11 @@ def draw_map(screen, view_offset_x, view_offset_y):
             if tile_id in TILE_SPRITES:
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
-                screen.blit(TILE_SPRITES[tile_id], (screen_x, screen_y))
+                tile_img = TILE_SPRITES[tile_id].copy()
+                # Darken map2 if locked
+                if row_idx < map2_rows_count and not is_unlocked:
+                    tile_img.set_alpha(40)
+                screen.blit(tile_img, (screen_x, screen_y))
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
     """Draw items on the map with camera offset"""
@@ -110,7 +114,7 @@ def draw_popup(screen):
     
     popup_font = pygame.font.Font(None, 48)
     text1 = popup_font.render("Press E to Unlock Full Map Content", True, (220, 220, 220))
-    text2 = popup_font.render("Before unlock: Map2 is hidden", True, (220, 220, 220))
+    text2 = popup_font.render("Before unlock: Upper area is hidden", True, (220, 220, 220))
     screen.blit(text1, (1300/2 - text1.get_width()/2, 800/2 - 40))
     screen.blit(text2, (1300/2 - text2.get_width()/2, 800/2 + 10))
 
@@ -141,7 +145,7 @@ def main():
     view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
     is_unlocked = False
     show_popup = False
-    trigger_pos = (TILE_SIZE * 6, TILE_SIZE * (map1_start_row) + 1)
+    trigger_pos = (player.x, TILE_SIZE * map1_start_row + 200)  # Trigger above player spawn
 
     zombies = spawn_zombies(screen, player, 5)
 
@@ -234,7 +238,7 @@ def main():
         screen.fill((255, 255, 255))
         
         # Draw map first
-        draw_map(screen, view_offset_x, view_offset_y)
+        draw_map(screen, view_offset_x, view_offset_y, is_unlocked)
         draw_map_items(screen, view_offset_x, view_offset_y)
 
         # Bullet → Zombie collision
@@ -292,6 +296,10 @@ def main():
             zombies = spawn_zombies(screen, player, 5)
 
         healthbar.draw()
+
+        # Draw popup if triggered
+        if show_popup:
+            draw_popup(screen)
 
         # ---------------- DRAW LEVEL TEXT ---------------- #
         level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
