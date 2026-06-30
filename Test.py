@@ -6,15 +6,21 @@ CORPSE_SIZE = 200
 W, H = 1300, 800
 screen = pygame.display.set_mode((W, H))
 
-def load_image(path, size, use_alpha=False):
-    """Load and scale image"""
-    method = "convert_alpha" if use_alpha else "convert"
+VIEW_COLS = W //TILE_SIZE
+VIEW_ROWS = H //TILE_SIZE
+
+
+view_offset_x = 0
+view_offset_y = 0
+
+def load_image(path, size, use_alpha = False):
+    method = "convert_alpha" if use_alpha else"convert"
     img = pygame.image.load(path)
     img = getattr(img, method)()
-    return pygame.transform.scale(img, size)
+    return pygame.transform.transform.scale(img, size)
+
 
 # Load sprites
-room_1_bg = load_image("room1_map.png", (W, H))
 tile_floor = load_image("White_Tile.png", (TILE_SIZE, TILE_SIZE))
 tile_floor_blood = load_image("Blood_Tile_fixed.png", (TILE_SIZE, TILE_SIZE))
 tile_wall = load_image("brick_wall.png", (TILE_SIZE, TILE_SIZE))
@@ -72,17 +78,31 @@ clock = pygame.time.Clock()
 running = True
 
 def draw_tile_map():
-    """Draw both map layers"""
-    for map_data in [map_data_1, map_data_2]:
-        for row_idx, row in enumerate(map_data):
-            for col_idx, tile_id in enumerate(row):
-                x, y = col_idx * TILE_SIZE, row_idx * TILE_SIZE
-                screen.blit(TILE_SPRITES[tile_id], (x, y))
+    global view_offset_x, view_offset_y
+    full_map = map_data_2
+
+    start_col = int(view_offset_x)
+    start_row = int(view_offset_y)
+
+    for row_idx in range(start_row, start_row + VIEW_ROWS + 1):
+        if row_idx < 0 or row_idx >=len (full_map):
+            continue
+        row = full_map[row_idx]
+        for col_idx in range(start_col, start_col + VIEW_COLS + 1):
+            if col_idx < 0 or col_idx >= len(row):
+                continue
+            tile_id = row [col_idx]
+            screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
+            screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
+            screen.blit(TILE_SPRITES[tile_id]),
+
 
 def draw_items():
-    """Draw all items"""
+    global view_offset_x, view_offset_y
     for row, col, item_type in items:
-        screen.blit(ITEM_SPRITES[item_type], (col * TILE_SIZE, row * TILE_SIZE))
+        screen_x = col * TILE_SIZE - view_offset_x * TILE_SIZE
+        screen_y = row * TILE_SIZE - view_offset_y * TILE_SIZE
+        screen.blit (ITEM_SPRITES[item_type], (screen_x, screen_y))
 
 def draw_popup():
     """Draw semi-transparent overlay with unlock message"""
@@ -101,15 +121,16 @@ def is_wall_collision(x, y, w, h):
     right_col = int((x + w - 1) // TILE_SIZE)
     top_row = int(y // TILE_SIZE)
     bottom_row = int((y + h - 1) // TILE_SIZE)
+    full_map = map_data_2
 
     for r in range(top_row, bottom_row + 1):
-        for c in range(left_col, right_col + 1):
-            if 0 <= r < len(map_data_1) and 0 <= c < len(map_data_1[r]):
-                if map_data_1[r][c] == 1:
-                    return True
-            if 0 <= r < len(map_data_2) and 0 <= c < len(map_data_2[r]):
-                if map_data_2[r][c] == 1:
-                    return True
+       if r < 0 or r>=len(full_map):
+           continue
+       for c in range(left_col, right_col + 1):
+           if c < 0 or c >=len(full_map[r]):
+               continue
+           if full_map[r][c] ==1:
+               return True
     return False
 
 #窗口边界检测
@@ -130,14 +151,26 @@ def player_movement():
     
     for key, dx, dy in moves:
         if keys[key]:
-            new_x, new_y = player_x + dx, player_y + dy
-            if not is_wall_collision(new_x, player_y, TILE_SIZE, TILE_SIZE) and not is_out_of_screen(new_x, player_y, TILE_SIZE, TILE_SIZE):
+            new_x = player_x + dx
+            new_y = player_y + dy
+            if not is_wall_collision(new_x, new_y, TILE_SIZE, TILE_SIZE) and not is_out_of_screen(new_x, new_y, TILE_SIZE, TILE_SIZE):
                 player_x = new_x
-            if not is_wall_collision(player_x, new_y, TILE_SIZE, TILE_SIZE) and not is_out_of_screen(player_x, new_y, TILE_SIZE, TILE_SIZE):
                 player_y = new_y
+
+               # 相机跟随玩家居中，实现视野扩张
+            view_offset_x = player_x / TILE_SIZE - VIEW_COLS / 2
+            view_offset_y = player_y / TILE_SIZE - VIEW_ROWS / 2
+
+            # 限制相机不超出整张地图边界，防止黑边
+            max_view_col = len(map_data_2[0]) - VIEW_COLS
+            max_view_row = len(map_data_2) - VIEW_ROWS
+            view_offset_x = max(0, min(view_offset_x, max_view_col))
+            view_offset_y = max(0, min(view_offset_y, max_view_row))
     
 def draw_player():
-    screen.blit(player, (player_x, player_y))
+    screen_x = player_x - view_offset_x * TILE_SIZE
+    screen_y = player_y - view_offset_y * TILE_SIZE
+    screen.blit(player, (screen_x, screen_y))
 
 
 while running:
@@ -159,7 +192,7 @@ while running:
 
     # Render
     screen.fill((0, 0, 0))
-    screen.blit(room_1_bg, (0, 0))
+
     
     if is_unlocked:
         draw_tile_map()
