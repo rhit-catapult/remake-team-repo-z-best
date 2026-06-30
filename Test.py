@@ -44,8 +44,8 @@ map_data = [
 ]
 
 items = [
-    (6, 10, 10),  # (row, column, item_type)
-    (6, 7, 20)
+    (4, 8, 10),  # (row, column, item_type)
+    (6, 6, 20)
 ]
 
 
