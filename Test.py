@@ -24,7 +24,7 @@ tile_grass_raw = pygame.image.load(("grass-tile.png"))
 tile_grass = pygame.transform.scale(tile_grass_raw, (TILE_SIZE, TILE_SIZE))
 
 box_raw = pygame.image.load(("box.png")).convert_alpha()
-box = pygame.transform.scale(box_raw,(TILE_SIZE,TILE_SIZE))
+box = pygame.transform.scale(box_raw,(CORPSE_SIZE,CORPSE_SIZE))
 
 corpse_raw = pygame.image.load(("dead_Zombie.png")).convert_alpha()
 corpse = pygame.transform.scale(corpse_raw, (CORPSE_SIZE, TILE_SIZE))
@@ -45,7 +45,7 @@ map_data = [
 
 items = [
     (6, 10, 10),  # (row, column, item_type)
-    (6, 5, 20)
+    (6, 7, 20)
 ]
 
 
