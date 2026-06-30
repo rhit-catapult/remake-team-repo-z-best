@@ -7,6 +7,7 @@ from my_character import MainC
 from zombie_module import Zombie
 from map import Rooms
 from maps import full_world_map, map_data_1, map_data_2, map2_rows_count, map1_start_row, items
+from assets import TILE_SPRITES, ITEM_SPRITES
 
 
 
@@ -67,6 +68,30 @@ def spawn_zombies(screen, player, count=5):
                 break
 
     return zombies
+
+
+# ---------------- MAP RENDERING ---------------- #
+
+def draw_map(screen):
+    """Draw the complete map on screen"""
+    from config import TILE_SIZE
+    
+    for row_idx, row in enumerate(full_world_map):
+        for col_idx, tile_id in enumerate(row):
+            x = col_idx * TILE_SIZE
+            y = row_idx * TILE_SIZE
+            if tile_id in TILE_SPRITES:
+                screen.blit(TILE_SPRITES[tile_id], (x, y))
+
+def draw_map_items(screen):
+    """Draw items on the map"""
+    from config import TILE_SIZE
+    
+    for row, col, item_type in items:
+        x = col * TILE_SIZE
+        y = row * TILE_SIZE
+        if item_type in ITEM_SPRITES:
+            screen.blit(ITEM_SPRITES[item_type], (x, y))
 
 
 # ---------------- MAIN GAME ---------------- #
@@ -139,6 +164,10 @@ def main():
                 return main()  # restart the whole game
         # Drawing
         screen.fill((255, 255, 255))
+        
+        # Draw map first
+        draw_map(screen)
+        draw_map_items(screen)
 
         # Bullet → Zombie collision
         for bullet in player.bullets[:]:
