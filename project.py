@@ -178,12 +178,12 @@ def main():
         
         # Check X movement collision
         new_x = player.x + dx
-        if not is_wall_collision(new_x, player.y, player.radius * 2, player.radius * 2) and not is_out_of_screen(new_x, player.y, player.radius * 2, player.radius * 2):
+        if not is_wall_collision(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2):
             player.x = new_x
         
         # Check Y movement collision
         new_y = player.y + dy
-        if not is_wall_collision(player.x, new_y, player.radius * 2, player.radius * 2) and not is_out_of_screen(player.x, new_y, player.radius * 2, player.radius * 2):
+        if not is_wall_collision(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2):
             player.y = new_y
         
         # Check popup trigger
@@ -240,7 +240,8 @@ def main():
         # Bullet → Zombie collision
         for bullet in player.bullets[:]:
             bullet.move()
-            bullet.draw()
+            # Draw bullet with camera offset
+            screen.blit(bullet.peanut, (bullet.bullet_x - view_offset_x * TILE_SIZE, bullet.bullet_y - view_offset_y * TILE_SIZE))
 
             for zombie in zombies[:]:
                 dx = bullet.bullet_x - zombie.x
