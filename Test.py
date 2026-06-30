@@ -17,7 +17,7 @@ def load_image(path, size, use_alpha = False):
     method = "convert_alpha" if use_alpha else"convert"
     img = pygame.image.load(path)
     img = getattr(img, method)()
-    return pygame.transform.transform.scale(img, size)
+    return pygame.transform.scale(img, size)
 
 
 # Load sprites
@@ -79,7 +79,7 @@ running = True
 
 def draw_tile_map():
     global view_offset_x, view_offset_y
-    full_map = map_data_2
+    full_map = map_data_1 + map_data_2  # Combine maps vertically
 
     start_col = int(view_offset_x)
     start_row = int(view_offset_y)
@@ -94,7 +94,7 @@ def draw_tile_map():
             tile_id = row [col_idx]
             screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
             screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
-            screen.blit(TILE_SPRITES[tile_id]),
+            screen.blit(TILE_SPRITES[tile_id], (screen_x, screen_y))
 
 
 def draw_items():
@@ -121,7 +121,7 @@ def is_wall_collision(x, y, w, h):
     right_col = int((x + w - 1) // TILE_SIZE)
     top_row = int(y // TILE_SIZE)
     bottom_row = int((y + h - 1) // TILE_SIZE)
-    full_map = map_data_2
+    full_map = map_data_1 + map_data_2
 
     for r in range(top_row, bottom_row + 1):
        if r < 0 or r>=len(full_map):
@@ -162,8 +162,9 @@ def player_movement():
             view_offset_y = player_y / TILE_SIZE - VIEW_ROWS / 2
 
             # 限制相机不超出整张地图边界，防止黑边
-            max_view_col = len(map_data_2[0]) - VIEW_COLS
-            max_view_row = len(map_data_2) - VIEW_ROWS
+            full_map = map_data_1 + map_data_2
+            max_view_col = len(full_map[0]) - VIEW_COLS
+            max_view_row = len(full_map) - VIEW_ROWS
             view_offset_x = max(0, min(view_offset_x, max_view_col))
             view_offset_y = max(0, min(view_offset_y, max_view_row))
     
@@ -192,7 +193,6 @@ while running:
 
     # Render
     screen.fill((0, 0, 0))
-
     
     if is_unlocked:
         draw_tile_map()
