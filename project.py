@@ -5,17 +5,11 @@ import math
 from healthbar import HealthBar
 from my_character import MainC
 from zombie_module import Zombie
-<<<<<<< HEAD
-# from map import Rooms
-=======
 from map import Rooms
 from maps import full_world_map, map_data_1, map_data_2, map2_rows_count, map1_start_row, items
 from assets import TILE_SPRITES, ITEM_SPRITES
 from config import TILE_SIZE
 from collision import is_wall_collision, is_out_of_screen
-
-
->>>>>>> e1f0e403df598720668e61c86ef1ddf7a8dae8e7
 
 # ---------------- START SCREEN ---------------- #
 
@@ -130,7 +124,7 @@ def main():
     screen = pygame.display.set_mode((1300, 800))
 
     # FONT FOR LEVEL DISPLAY
-    font = pygame.font.SysFont(None, 40)
+    font = pygame.font.Font(None, 40)
 
     # Load level clear PNG AFTER display is created
     level_clear_img = pygame.image.load("level_complete.png").convert_alpha()
@@ -139,7 +133,7 @@ def main():
     # Show start screen first
     start_screen(screen)
 
-    player = MainC(screen, 650, 950, "Character_Placeholder.png")
+    player = MainC(screen, 650, 1250, "Character_Placeholder.png")
     healthbar = HealthBar(screen)
     
     # Camera and map state
@@ -259,10 +253,16 @@ def main():
 
                     break  # stop checking other zombies for this bullet
 
+        # Draw player with camera offset
+        player.rect.center = (player.x - view_offset_x * TILE_SIZE, player.y - view_offset_y * TILE_SIZE)
         player.draw()
 
         for zombie in zombies:
+            # Draw zombie with camera offset
+            old_x, old_y = zombie.rect.x, zombie.rect.y
+            zombie.rect.center = (zombie.x - view_offset_x * TILE_SIZE, zombie.y - view_offset_y * TILE_SIZE)
             zombie.draw()
+            zombie.rect.x, zombie.rect.y = old_x, old_y  # restore for collision detection
 
         # ---------------- LEVEL CLEAR CHECK ---------------- #
         if len(zombies) == 0:
@@ -288,23 +288,11 @@ def main():
             zombies = spawn_zombies(screen, player, 5)
 
         healthbar.draw()
-<<<<<<< HEAD
 
         # ---------------- DRAW LEVEL TEXT ---------------- #
         level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
         screen.blit(level_text, (20, 760))  # bottom-left corner
 
-=======
-        #big_r = Map(screen)
-        #room_5 = Rooms(screen, 5)
-        #big_r.draw()
-        #room_5.draw()
-        
-        # Draw popup if needed
-        if show_popup:
-            draw_popup(screen)
-        
->>>>>>> e1f0e403df598720668e61c86ef1ddf7a8dae8e7
         pygame.display.update()
 
 
