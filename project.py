@@ -95,7 +95,7 @@ def draw_map(screen, view_offset_x, view_offset_y, is_unlocked):
                 tile_img = TILE_SPRITES[tile_id].copy()
                 # Darken map2 if locked
                 if row_idx < map2_rows_count and not is_unlocked:
-                    tile_img.set_alpha(100)
+                    tile_img.set_alpha(60)
                 screen.blit(tile_img, (screen_x, screen_y))
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
@@ -114,7 +114,7 @@ def draw_popup(screen):
     
     popup_font = pygame.font.Font(None, 48)
     text1 = popup_font.render("Press E to Unlock Full Map Content", True, (220, 220, 220))
-    text2 = popup_font.render("Before unlock: Map2 is hidden", True, (220, 220, 220))
+    text2 = popup_font.render("Before unlock: Upper area is hidden", True, (220, 220, 220))
     screen.blit(text1, (1300/2 - text1.get_width()/2, 800/2 - 40))
     screen.blit(text2, (1300/2 - text2.get_width()/2, 800/2 + 10))
 
