@@ -28,6 +28,24 @@ def start_screen(screen):
         screen.blit(start_img, (0, 0))
         pygame.display.update()
 
+def death_screen(screen):
+    death_img = pygame.image.load("you_died.png").convert_alpha()
+    death_img = pygame.transform.scale(death_img, (1300, 800))
+
+    start_time = pygame.time.get_ticks()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            # Allow clicking to restart AFTER 1 second
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pygame.time.get_ticks() - start_time > 1000:
+                    return  # restart the game
+
+        screen.blit(death_img, (0, 0))
+        pygame.display.update()
 
 # ---------------- ZOMBIE SPAWNING ---------------- #
 
@@ -115,7 +133,10 @@ def main():
                     player.last_hit_time = current_time
                     healthbar.set_hp(player.hp)
                     hurt_sound.play()
-
+            if player.hp <= 0:
+                pygame.time.delay(1000)
+                death_screen(screen)
+                return main()  # restart the whole game
         # Drawing
         screen.fill((255, 255, 255))
 
