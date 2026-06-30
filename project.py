@@ -133,7 +133,7 @@ def main():
     # Show start screen first
     start_screen(screen)
 
-    player = MainC(screen, 650, 1250, "Character_Placeholder.png")
+    player = MainC(screen, 800, 1250, "Character_Placeholder.png")
     healthbar = HealthBar(screen)
     
     # Camera and map state
@@ -202,6 +202,9 @@ def main():
         view_offset_y = max(0, min(view_offset_y, max_view_row))
 
         player.mouse_x, player.mouse_y = pygame.mouse.get_pos()
+        # Convert mouse screen coords to world coords for proper angle calculation
+        player.mouse_x += int(view_offset_x * TILE_SIZE)
+        player.mouse_y += int(view_offset_y * TILE_SIZE)
         player.update_angle()
 
         current_time = pygame.time.get_ticks()
