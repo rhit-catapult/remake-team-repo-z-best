@@ -180,6 +180,10 @@ map2_start_row = map4_rows_count + map3_rows_count
 map1_start_row = map4_rows_count + map3_rows_count + map2_rows_count
 map8_start_row = map2_start_row
 
+map3_start_col = 0
+map3_room_rows_count = len(map_data_3)
+map3_room_cols_count = len(map_data_3[0])
+
 map7_start_row = map3_start_row
 map7_rows_count = len(map_data_7)
 map7_cols_count = len(map_data_7[0])

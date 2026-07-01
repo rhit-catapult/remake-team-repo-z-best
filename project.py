@@ -6,7 +6,7 @@ from healthbar import HealthBar
 from my_character import MainC
 from zombie_module import Zombie
 from map import Rooms
-from maps import full_world_map, map1_start_row, map2_start_row, map3_start_row, map4_start_row, map5_start_row, map5_start_col, map5_rows_count, map5_cols_count, map7_start_row, map7_start_col, map7_rows_count, map7_cols_count, map8_start_row, map8_start_col, map8_rows_count, map8_cols_count, room6_passage_start_row, room6_passage_end_row, room6_passage_start_col, room6_passage_end_col, items
+from maps import full_world_map, map1_start_row, map2_start_row, map3_start_row, map3_start_col, map3_room_rows_count, map3_room_cols_count, map4_start_row, map5_start_row, map5_start_col, map5_rows_count, map5_cols_count, map7_start_row, map7_start_col, map7_rows_count, map7_cols_count, map8_start_row, map8_start_col, map8_rows_count, map8_cols_count, room6_passage_start_row, room6_passage_end_row, room6_passage_start_col, room6_passage_end_col, items
 from assets import TILE_SPRITES, ITEM_SPRITES
 from config import TILE_SIZE
 from collision import is_wall_collision, is_out_of_screen
@@ -149,6 +149,109 @@ def spawn_zombies(screen, player, count=5):
     return zombies
 
 
+def spawn_zombies_in_room(screen, player, count, room_start_row, room_start_col, room_rows, room_cols):
+    zombies = []
+    spawn_radius = 40
+
+    min_x = room_start_col * TILE_SIZE + spawn_radius
+    max_x = (room_start_col + room_cols) * TILE_SIZE - spawn_radius
+    min_y = room_start_row * TILE_SIZE + spawn_radius
+    max_y = (room_start_row + room_rows) * TILE_SIZE - spawn_radius
+
+    if min_x >= max_x or min_y >= max_y:
+        return zombies
+
+    for _ in range(count):
+        for _attempt in range(200):
+            x = random.randint(int(min_x), int(max_x))
+            y = random.randint(int(min_y), int(max_y))
+
+            dx = player.x - x
+            dy = player.y - y
+            distance = math.hypot(dx, dy)
+            collides_with_map = is_wall_collision(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+            )
+            if distance > (player.radius + 100) and not collides_with_map:
+                zombie = Zombie(screen, x, y, "ZombieFIXED.png")
+                zombie.hp = 3
+                zombies.append(zombie)
+                break
+
+    return zombies
+
+
+def spawn_patrol_zombies_in_room(screen, player, count, room_start_row, room_start_col, room_rows, room_cols):
+    zombies = []
+    spawn_radius = 40
+
+    min_x = room_start_col * TILE_SIZE + spawn_radius
+    max_x = (room_start_col + room_cols) * TILE_SIZE - spawn_radius
+    min_y = room_start_row * TILE_SIZE + spawn_radius
+    max_y = (room_start_row + room_rows) * TILE_SIZE - spawn_radius
+
+    if min_x >= max_x or min_y >= max_y:
+        return zombies
+
+    for _ in range(count):
+        for _attempt in range(200):
+            x = random.randint(int(min_x), int(max_x))
+            y = random.randint(int(min_y), int(max_y))
+
+            collides_with_map = is_wall_collision(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+            )
+            if not collides_with_map:
+                zombie = Zombie(screen, x, y, "ZombieFIXED.png")
+                zombie.hp = 3
+                zombie.patrol_mode = True
+                zombie.patrol_dir = random.choice((-1, 1))
+                zombie.patrol_speed = 2.0
+                zombie.wave_tag = "room2_patrol"
+                zombies.append(zombie)
+                break
+
+    return zombies
+
+
+def keep_zombie_in_room(zombie, room_start_row, room_start_col, room_rows, room_cols):
+    min_x = room_start_col * TILE_SIZE + zombie.radius
+    max_x = (room_start_col + room_cols) * TILE_SIZE - zombie.radius
+    min_y = room_start_row * TILE_SIZE + zombie.radius
+    max_y = (room_start_row + room_rows) * TILE_SIZE - zombie.radius
+
+    zombie.x = max(min_x, min(zombie.x, max_x))
+    zombie.y = max(min_y, min(zombie.y, max_y))
+    zombie.rect.center = (zombie.x, zombie.y)
+
+
+def move_patrol_zombie(zombie, room_start_row, room_start_col, room_rows, room_cols):
+    min_x = room_start_col * TILE_SIZE + zombie.radius
+    max_x = (room_start_col + room_cols) * TILE_SIZE - zombie.radius
+    min_y = room_start_row * TILE_SIZE + zombie.radius
+    max_y = (room_start_row + room_rows) * TILE_SIZE - zombie.radius
+
+    next_x = zombie.x + zombie.patrol_dir * zombie.patrol_speed
+
+    hits_wall = is_wall_collision(next_x - zombie.radius, zombie.y - zombie.radius, zombie.radius * 2, zombie.radius * 2)
+    out_of_bounds = is_out_of_screen(next_x - zombie.radius, zombie.y - zombie.radius, zombie.radius * 2, zombie.radius * 2)
+    hits_room_side = next_x <= min_x or next_x >= max_x
+
+    if hits_wall or out_of_bounds or hits_room_side:
+        zombie.patrol_dir *= -1
+        next_x = zombie.x + zombie.patrol_dir * zombie.patrol_speed
+
+    zombie.x = max(min_x, min(next_x, max_x))
+    zombie.y = max(min_y, min(zombie.y, max_y))
+    zombie.rect.center = (zombie.x, zombie.y)
+
+
 # ---------------- MAP RENDERING ---------------- #
 
 def _is_fence_tile(row_idx, col_idx):
@@ -207,17 +310,20 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
                 if tile_id == 4:
                     base_img = TILE_SPRITES[2].copy()
                     fence_img = _get_fence_overlay(row_idx, col_idx)
-                    if should_darken:
-                        base_img.set_alpha(55)
-                        fence_img.set_alpha(55)
                     screen.blit(base_img, (screen_x, screen_y))
                     # Slight overlap helps hide seams at tile boundaries.
                     screen.blit(fence_img, (screen_x - 1, screen_y - 1))
+                    if should_darken:
+                        dark_overlay = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
+                        dark_overlay.fill((0, 0, 0, 210))
+                        screen.blit(dark_overlay, (screen_x, screen_y))
                 else:
                     tile_img = TILE_SPRITES[tile_id].copy()
-                    if should_darken:
-                        tile_img.set_alpha(55)
                     screen.blit(tile_img, (screen_x, screen_y))
+                    if should_darken:
+                        dark_overlay = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
+                        dark_overlay.fill((0, 0, 0, 210))
+                        screen.blit(dark_overlay, (screen_x, screen_y))
 
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
@@ -238,14 +344,25 @@ def draw_unlock_prompt(screen, next_map_number):
     screen.blit(prompt_text, (1300 / 2 - prompt_text.get_width() / 2, 35))
 
 
-def draw_level2_popup(screen):
+def draw_level2_popup(screen, kills, elapsed_seconds):
     overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
     overlay.fill((10, 25, 40, 120))
     screen.blit(overlay, (0, 0))
 
-    popup_font = pygame.font.Font(None, 120)
-    level_text = popup_font.render("LEVEL 2", True, (240, 240, 240))
-    screen.blit(level_text, (1300 / 2 - level_text.get_width() / 2, 800 / 2 - level_text.get_height() / 2))
+    title_font = pygame.font.Font(None, 120)
+    stat_font = pygame.font.Font(None, 56)
+
+    mins = elapsed_seconds // 60
+    secs = elapsed_seconds % 60
+    time_text = f"Time: {mins:02d}:{secs:02d}"
+
+    stage_text = title_font.render("STAGE 2", True, (240, 240, 240))
+    kills_text = stat_font.render(f"Zombies Killed: {kills}", True, (225, 235, 245))
+    elapsed_text = stat_font.render(time_text, True, (225, 235, 245))
+
+    screen.blit(stage_text, (1300 / 2 - stage_text.get_width() / 2, 800 / 2 - 150))
+    screen.blit(kills_text, (1300 / 2 - kills_text.get_width() / 2, 800 / 2 - 20))
+    screen.blit(elapsed_text, (1300 / 2 - elapsed_text.get_width() / 2, 800 / 2 + 40))
 
 
 def draw_level3_popup(screen):
@@ -256,6 +373,16 @@ def draw_level3_popup(screen):
     popup_font = pygame.font.Font(None, 120)
     level_text = popup_font.render("LEVEL 3", True, (240, 240, 240))
     screen.blit(level_text, (1300 / 2 - level_text.get_width() / 2, 800 / 2 - level_text.get_height() / 2))
+
+
+def draw_stage1_popup(screen):
+    overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
+    overlay.fill((20, 20, 30, 120))
+    screen.blit(overlay, (0, 0))
+
+    popup_font = pygame.font.Font(None, 120)
+    stage_text = popup_font.render("STAGE 1", True, (240, 240, 240))
+    screen.blit(stage_text, (1300 / 2 - stage_text.get_width() / 2, 800 / 2 - stage_text.get_height() / 2))
 
 
 def draw_escape_prompt(screen):
@@ -460,11 +587,22 @@ def main():
     show_level2_popup = False
     level2_popup_started_at = 0
     level2_popup_duration_ms = 1800
+    stage1_started_at = pygame.time.get_ticks()
+    stage2_summary_kills = 0
+    stage2_summary_time_s = 0
     show_level3_popup = False
     level3_popup_started_at = 0
     level3_popup_duration_ms = 1800
+    show_stage1_popup = True
+    stage1_popup_started_at = pygame.time.get_ticks()
+    stage1_popup_duration_ms = 1800
+    first_wave_started = False
+    first_wave_completed = False
+    map2_start_col = 0
+    map2_room_rows_count = map1_start_row - map2_start_row
+    map2_room_cols_count = map3_room_cols_count
 
-    zombies = spawn_zombies(screen, player, 5)
+    zombies = []
 
     clock = pygame.time.Clock()
     hurt_sound = pygame.mixer.Sound("Roblox - Oof Death (Sound Effect).mp3")
@@ -492,6 +630,31 @@ def main():
                 if unlocked_min_row == map1_start_row:
                     unlocked_min_row = map2_start_row
                     next_map_number = 3
+                    if not first_wave_started:
+                        wave1_zombies = spawn_zombies_in_room(
+                            screen,
+                            player,
+                            5,
+                            map3_start_row,
+                            map3_start_col,
+                            map3_room_rows_count,
+                            map3_room_cols_count,
+                        )
+                        for zombie in wave1_zombies:
+                            zombie.wave_tag = "wave1"
+
+                        patrol_zombies = spawn_patrol_zombies_in_room(
+                            screen,
+                            player,
+                            3,
+                            map2_start_row,
+                            map2_start_col,
+                            map2_room_rows_count,
+                            map2_room_cols_count,
+                        )
+
+                        zombies = wave1_zombies + patrol_zombies
+                        first_wave_started = True
                 elif unlocked_min_row == map2_start_row:
                     unlocked_min_row = map3_start_row
                     next_map_number = 4
@@ -501,6 +664,8 @@ def main():
                 elif next_map_number == 5:
                     room5_unlocked = True
                     next_map_number = 6
+                    stage2_summary_kills = zombies_killed
+                    stage2_summary_time_s = max(0, (pygame.time.get_ticks() - stage1_started_at) // 1000)
                     show_level2_popup = True
                     level2_popup_started_at = pygame.time.get_ticks()
                 elif next_map_number == 6:
@@ -584,6 +749,8 @@ def main():
             show_level2_popup = False
         if show_level3_popup and (pygame.time.get_ticks() - level3_popup_started_at >= level3_popup_duration_ms):
             show_level3_popup = False
+        if show_stage1_popup and (pygame.time.get_ticks() - stage1_popup_started_at >= stage1_popup_duration_ms):
+            show_stage1_popup = False
 
         if _player_in_room6_passage(player) and current_level < 3:
             current_level = 3
@@ -606,9 +773,28 @@ def main():
         current_time = pygame.time.get_ticks()
 
         # ---------------- ZOMBIE MOVEMENT ---------------- #
+        room3_locked = unlocked_min_row > map3_start_row
         for zombie in zombies:
-            zombie.follow_player(player)
-            zombie.update_angle(player)
+            if getattr(zombie, "patrol_mode", False):
+                move_patrol_zombie(
+                    zombie,
+                    map2_start_row,
+                    map2_start_col,
+                    map2_room_rows_count,
+                    map2_room_cols_count,
+                )
+            else:
+                zombie.follow_player(player)
+                zombie.update_angle(player)
+
+            if first_wave_started and not first_wave_completed and room3_locked and getattr(zombie, "wave_tag", "") == "wave1":
+                keep_zombie_in_room(
+                    zombie,
+                    map3_start_row,
+                    map3_start_col,
+                    map3_room_rows_count,
+                    map3_room_cols_count,
+                )
 
             dx = player.x - zombie.x
             dy = player.y - zombie.y
@@ -720,7 +906,8 @@ def main():
             draw_boss_health_bar(screen, boss, boss_max_hp, view_offset_x, view_offset_y)
 
         # ---------------- LEVEL CLEAR CHECK ---------------- #
-        if len(zombies) == 0 and not boss_spawned:
+        wave1_alive = any(getattr(zombie, "wave_tag", "") == "wave1" for zombie in zombies)
+        if first_wave_started and (not first_wave_completed) and (not wave1_alive):
             screen.blit(level_clear_img, (350, 250))
             pygame.display.update()
 
@@ -736,18 +923,10 @@ def main():
 
                 pygame.time.delay(50)
 
-            current_level += 1
+            first_wave_completed = True
+            current_level = max(current_level, 2)
             player.bullets.clear()
-
-            # Spawn boss at Level 5
-            if current_level == 5:
-                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 5.1)
-                boss.hp = 20
-                boss_max_hp = boss.hp
-                boss.radius = (boss.image.get_width() / 2) + 2
-                boss_spawned = True
-            else:
-                zombies = spawn_zombies(screen, player, 5)
+            zombies.clear()
 
         healthbar.draw()
         draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked, minimap_x, minimap_y)
@@ -756,9 +935,11 @@ def main():
             draw_unlock_prompt(screen, next_map_number)
 
         if show_level2_popup:
-            draw_level2_popup(screen)
+            draw_level2_popup(screen, stage2_summary_kills, stage2_summary_time_s)
         if show_level3_popup:
             draw_level3_popup(screen)
+        if show_stage1_popup:
+            draw_stage1_popup(screen)
 
         if _player_in_final_room(player):
             draw_escape_prompt(screen)
