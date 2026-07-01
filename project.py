@@ -74,6 +74,31 @@ def spawn_zombies(screen, player, count=5):
 
 # ---------------- MAP RENDERING ---------------- #
 
+def _is_fence_tile(row_idx, col_idx):
+    """Return True when the map tile exists and is a fence tile."""
+    if row_idx < 0 or row_idx >= len(full_world_map):
+        return False
+    row = full_world_map[row_idx]
+    if col_idx < 0 or col_idx >= len(row):
+        return False
+    return row[col_idx] == 4
+
+
+def _get_fence_overlay(row_idx, col_idx):
+    """Rotate fence sprite to match neighbor direction where possible."""
+    up = _is_fence_tile(row_idx - 1, col_idx)
+    down = _is_fence_tile(row_idx + 1, col_idx)
+    left = _is_fence_tile(row_idx, col_idx - 1)
+    right = _is_fence_tile(row_idx, col_idx + 1)
+
+    fence_img = TILE_SPRITES[4].copy()
+
+    # If this segment connects mostly vertically, rotate the fence texture.
+    if (up or down) and not (left or right):
+        fence_img = pygame.transform.rotate(fence_img, 90)
+
+    return fence_img
+
 def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked):
     """Draw the complete map with camera offset"""
     view_cols = 1300 // TILE_SIZE
@@ -103,12 +128,13 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
                 # Fence tile uses grass as base with a transparent fence overlay.
                 if tile_id == 4:
                     base_img = TILE_SPRITES[2].copy()
-                    fence_img = TILE_SPRITES[4].copy()
+                    fence_img = _get_fence_overlay(row_idx, col_idx)
                     if should_darken:
                         base_img.set_alpha(55)
                         fence_img.set_alpha(55)
                     screen.blit(base_img, (screen_x, screen_y))
-                    screen.blit(fence_img, (screen_x, screen_y))
+                    # Slight overlap helps hide seams at tile boundaries.
+                    screen.blit(fence_img, (screen_x - 1, screen_y - 1))
                 else:
                     tile_img = TILE_SPRITES[tile_id].copy()
                     if should_darken:
