@@ -699,7 +699,7 @@ def main():
     first_wave_started = False
     first_wave_completed = False
     room3_entry_started_at = None
-    room3_chase_delay_ms = 3000
+    room3_chase_delay_ms = 1000
     map2_start_col = 0
     map2_room_rows_count = map1_start_row - map2_start_row
     map2_room_cols_count = map3_room_cols_count
