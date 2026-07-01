@@ -15,20 +15,26 @@ class level_title:
             image_filename = ("2.png")
         if self.level is 3:
             image_filename = ("3.png")
+        if self.level is 4: #Boss Jose
+            image_filename = ("4_.png")
         if self.level is 5:
             image_filename = ("5.png")
         if self.level is 6:
             image_filename = ("6.png")
+        if self.level is 7: #Boss Autumn
+            image_filename = ("7_.png")
         if self.level is 8:
             image_filename = ("8.png")
         if self.level is 9:
             image_filename = ("9.png")
+        if self.level is 10: #Boss Ethan
+            image_filename = ("10_.png")
         if self.level is 1 or 2 or 3 or 5 or 6 or 8 or 9:
             self.x = 955
             self.y = 100
         else:
-            self.x = 0
-            self.y = 0
+            self.x = 800
+            self.y = 100
         self.screen.blit(pygame.image.load(image_filename), (self.x, self.y))
 
 
@@ -83,7 +89,7 @@ def test_character():
     Autumn = boss(screen, 600, 400,"Boss_Autum.png", 35, 5.5)
     Ethan = boss(screen, 1000, 400, "Boss_Ethan.png", 50, 7)
     zombie = boss(screen, 100, 100, "Boss_Jose.png", 5, 2)
-    title = level_title(screen, 8)
+    title = level_title(screen, 10)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
