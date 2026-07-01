@@ -2,7 +2,7 @@
 import pygame
 from config import W, H, TILE_SIZE, screen, popup_font, VIEW_COLS, VIEW_ROWS
 from assets import TILE_SPRITES, ITEM_SPRITES
-from maps import full_world_map, map2_rows_count, items
+from maps import full_world_map, locked_rows_count, items
 
 def draw_full_map(view_offset_x, view_offset_y, is_unlocked):
     """Draw the complete map with camera offset"""
@@ -19,8 +19,8 @@ def draw_full_map(view_offset_x, view_offset_y, is_unlocked):
             tile_id = row_data[col_idx]
             tile_img = TILE_SPRITES[tile_id].copy()
 
-            # Darken map2 if not unlocked
-            if row_idx < map2_rows_count and not is_unlocked:
+            # Darken maps 2-4 if not unlocked.
+            if row_idx < locked_rows_count and not is_unlocked:
                 tile_img.set_alpha(60)
 
             screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
@@ -37,11 +37,11 @@ def draw_items(view_offset_x, view_offset_y):
 def draw_popup():
     """Draw unlock popup overlay"""
     overlay = pygame.Surface((W, H), pygame.SRCALPHA)
-    overlay.fill((0, 0, 180, 150))
+    overlay.fill((0, 0, 0, 120))
     screen.blit(overlay, (0, 0))
 
-    text1 = popup_font.render("Press E to Unlock Full Map Content", True, (220, 220, 220))
-    text2 = popup_font.render("Before unlock: Only background image displays", True, (220, 220, 220))
+    text1 = popup_font.render("Press E to unlock", True, (220, 220, 220))
+    text2 = popup_font.render("Maps 2-4 are locked", True, (220, 220, 220))
     screen.blit(text1, (W/2 - text1.get_width()/2, H/2 - 40))
     screen.blit(text2, (W/2 - text2.get_width()/2, H/2 + 10))
 

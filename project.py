@@ -6,7 +6,7 @@ from healthbar import HealthBar
 from my_character import MainC
 from zombie_module import Zombie
 from map import Rooms
-from maps import full_world_map, map_data_1, map_data_2, map2_rows_count, map1_start_row, items
+from maps import full_world_map, map1_start_row, locked_rows_count, items
 from assets import TILE_SPRITES, ITEM_SPRITES
 from config import TILE_SIZE
 from collision import is_wall_collision, is_out_of_screen
@@ -93,9 +93,9 @@ def draw_map(screen, view_offset_x, view_offset_y, is_unlocked):
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
                 tile_img = TILE_SPRITES[tile_id].copy()
-                # Darken map2 if locked
-                if row_idx < map2_rows_count and not is_unlocked:
-                    tile_img.set_alpha(40)
+                # Darken maps 2-4 while locked (rows above map 1).
+                if row_idx < locked_rows_count and not is_unlocked:
+                    tile_img.set_alpha(55)
                 screen.blit(tile_img, (screen_x, screen_y))
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
@@ -106,17 +106,15 @@ def draw_map_items(screen, view_offset_x, view_offset_y):
             screen_y = row * TILE_SIZE - view_offset_y * TILE_SIZE
             screen.blit(ITEM_SPRITES[item_type], (screen_x, screen_y))
 
-def draw_popup(screen):
-    """Draw unlock popup overlay"""
-    overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
-    overlay.fill((0, 0, 180, 150))
-    screen.blit(overlay, (0, 0))
-    
-    popup_font = pygame.font.Font(None, 48)
-    text1 = popup_font.render("Press E to Unlock Full Map Content", True, (220, 220, 220))
-    text2 = popup_font.render("Before unlock: Upper area is hidden", True, (220, 220, 220))
-    screen.blit(text1, (1300/2 - text1.get_width()/2, 800/2 - 40))
-    screen.blit(text2, (1300/2 - text2.get_width()/2, 800/2 + 10))
+def draw_unlock_prompt(screen):
+    """Draw a contextual unlock prompt when near locked maps."""
+    prompt_bg = pygame.Surface((420, 54), pygame.SRCALPHA)
+    prompt_bg.fill((15, 15, 15, 190))
+    screen.blit(prompt_bg, (1300 / 2 - 210, 24))
+
+    popup_font = pygame.font.Font(None, 42)
+    prompt_text = popup_font.render("Press E to unlock", True, (230, 230, 230))
+    screen.blit(prompt_text, (1300 / 2 - prompt_text.get_width() / 2, 35))
 
 
 # ---------------- MAIN GAME ---------------- #
@@ -137,7 +135,7 @@ def main():
     # Show start screen first
     start_screen(screen)
 
-    player = MainC(screen, 800, 1250, "Character_Placeholder.png")
+    player = MainC(screen, TILE_SIZE * 6, TILE_SIZE * (map1_start_row + 4), "Character_Placeholder.png")
     healthbar = HealthBar(screen)
     
     # Camera and map state
@@ -145,7 +143,7 @@ def main():
     view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
     is_unlocked = False
     show_popup = False
-    trigger_pos = (player.x, TILE_SIZE * map1_start_row + 200)  # Trigger above player spawn
+    unlock_prompt_y = TILE_SIZE * (map1_start_row + 1)
 
     zombies = spawn_zombies(screen, player, 5)
 
@@ -162,7 +160,7 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 player.fire()
             
-            # E key to unlock map
+            # E key to unlock maps 2-4 when prompt is shown
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
                 is_unlocked = True
                 show_popup = False
@@ -187,13 +185,12 @@ def main():
         
         # Check Y movement collision
         new_y = player.y + dy
-        if not is_wall_collision(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2):
+        entering_locked_rows = (not is_unlocked) and ((new_y - player.radius) < (map1_start_row * TILE_SIZE))
+        if not entering_locked_rows and not is_wall_collision(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2):
             player.y = new_y
         
-        # Check popup trigger
-        if not is_unlocked and not show_popup:
-            if abs(player.x - trigger_pos[0]) < TILE_SIZE and abs(player.y - trigger_pos[1]) < TILE_SIZE:
-                show_popup = True
+        # Show unlock prompt when approaching the top of map 1.
+        show_popup = (not is_unlocked) and (player.y <= unlock_prompt_y)
         
         # Update camera to follow player
         view_offset_x = player.x / TILE_SIZE - (1300 // TILE_SIZE) / 2
@@ -297,9 +294,9 @@ def main():
 
         healthbar.draw()
 
-        # Draw popup if triggered
+        # Draw contextual unlock prompt near locked section
         if show_popup:
-            draw_popup(screen)
+            draw_unlock_prompt(screen)
 
         # ---------------- DRAW LEVEL TEXT ---------------- #
         level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
