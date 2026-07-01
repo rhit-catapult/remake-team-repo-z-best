@@ -6,7 +6,7 @@ from healthbar import HealthBar
 from my_character import MainC
 from zombie_module import Zombie
 from map import Rooms
-from maps import full_world_map, map1_start_row, map2_start_row, map3_start_row, map3_start_col, map3_room_rows_count, map3_room_cols_count, map4_start_row, map5_start_row, map5_start_col, map5_rows_count, map5_cols_count, map7_start_row, map7_start_col, map7_rows_count, map7_cols_count, map8_start_row, map8_start_col, map8_rows_count, map8_cols_count, room6_passage_start_row, room6_passage_end_row, room6_passage_start_col, room6_passage_end_col, items
+from maps import full_world_map, map1_start_row, map2_start_row, map3_start_row, map3_start_col, map3_room_rows_count, map3_room_cols_count, map4_start_row, map5_start_row, map5_start_col, map5_rows_count, map5_cols_count, map6_start_row, map6_start_col, map6_rows_count, map6_cols_count, map7_start_row, map7_start_col, map7_rows_count, map7_cols_count, map8_start_row, map8_start_col, map8_rows_count, map8_cols_count, room6_passage_start_row, room6_passage_end_row, room6_passage_start_col, room6_passage_end_col, items
 from assets import TILE_SPRITES, ITEM_SPRITES
 from config import TILE_SIZE
 from collision import is_wall_collision, is_out_of_screen
@@ -425,7 +425,7 @@ def _get_fence_overlay(row_idx, col_idx):
 
     return fence_img
 
-def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked):
+def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked, room6_unlocked, room7_unlocked, room8_unlocked):
     view_cols = 1300 // TILE_SIZE
     view_rows = 800 // TILE_SIZE
     start_col = int(view_offset_x)
@@ -446,6 +446,8 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
                 if row_idx < unlocked_min_row:
                     should_darken = True
                 if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
+                    should_darken = True
+                if (not room6_unlocked) and row_idx >= map6_start_row and row_idx < (map6_start_row + map6_rows_count) and col_idx >= map6_start_col and col_idx < (map6_start_col + map6_cols_count):
                     should_darken = True
                 if (not room7_unlocked) and row_idx >= map7_start_row and row_idx < (map7_start_row + map7_rows_count) and col_idx >= map7_start_col and col_idx < (map7_start_col + map7_cols_count):
                     should_darken = True
@@ -659,7 +661,7 @@ def draw_boss_health_bar(screen, boss, max_hp, view_offset_x, view_offset_y):
     screen.blit(hp_text, (text_x, text_y))
 
 
-def draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked, x, y):
+def draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room6_unlocked, room7_unlocked, room8_unlocked, x, y):
     """Draw a full-map minimap with player/zombie markers and lock shading."""
     map_rows = len(full_world_map)
     map_cols = len(full_world_map[0])
@@ -698,6 +700,8 @@ def draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room
             if row_idx < unlocked_min_row:
                 color = (color[0] // 4, color[1] // 4, color[2] // 4)
             if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
+                color = (color[0] // 4, color[1] // 4, color[2] // 4)
+            if (not room6_unlocked) and row_idx >= map6_start_row and row_idx < (map6_start_row + map6_rows_count) and col_idx >= map6_start_col and col_idx < (map6_start_col + map6_cols_count):
                 color = (color[0] // 4, color[1] // 4, color[2] // 4)
             if (not room7_unlocked) and row_idx >= map7_start_row and row_idx < (map7_start_row + map7_rows_count) and col_idx >= map7_start_col and col_idx < (map7_start_col + map7_cols_count):
                 color = (color[0] // 4, color[1] // 4, color[2] // 4)
@@ -751,6 +755,7 @@ def main():
     view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
     unlocked_min_row = map1_start_row
     room5_unlocked = False
+    room6_unlocked = False
     room7_unlocked = False
     room8_unlocked = False
     show_popup = False
@@ -851,6 +856,12 @@ def main():
                 elif unlocked_min_row == map3_start_row:
                     unlocked_min_row = map4_start_row
                     next_map_number = 5
+                    if not boss_spawned:
+                        boss = Boss_class(screen, TILE_SIZE * 6, TILE_SIZE * (map4_start_row + 4), "Boss_Jose.png", 30, 6.0)
+                        boss.hp = 30
+                        boss_max_hp = boss.hp
+                        boss.radius = (boss.image.get_width() / 2) + 2
+                        boss_spawned = True
                 elif next_map_number == 5:
                     room5_unlocked = True
                     next_map_number = 6
@@ -861,16 +872,19 @@ def main():
                     show_level2_popup = True
                     level2_popup_started_at = pygame.time.get_ticks()
                 elif next_map_number == 6:
-                    room7_unlocked = True
+                    room6_unlocked = True
                     next_map_number = 7
                 elif next_map_number == 7:
+                    room7_unlocked = True
+                    next_map_number = 8
+                elif next_map_number == 8:
                     room8_unlocked = True
                     next_map_number = None
                 show_popup = False
 
         if is_paused:
             screen.fill((255, 255, 255))
-            draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked)
+            draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked, room6_unlocked, room7_unlocked, room8_unlocked)
             draw_map_items(screen, view_offset_x, view_offset_y)
 
             for bullet in player.bullets:
@@ -887,7 +901,7 @@ def main():
                 draw_zombie_health_bar(screen, zombie, view_offset_x, view_offset_y)
 
             healthbar.draw()
-            draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked, minimap_x, minimap_y)
+            draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room6_unlocked, room7_unlocked, room8_unlocked, minimap_x, minimap_y)
             draw_pause_popup(screen, zombies_killed)
             pygame.display.update()
             continue
@@ -906,17 +920,19 @@ def main():
         
         new_x = player.x + dx
         enters_locked_room5_x = (not room5_unlocked) and (new_x + player.radius >= map5_start_col * TILE_SIZE) and (player.y + player.radius >= map5_start_row * TILE_SIZE) and (player.y - player.radius < (map5_start_row + map5_rows_count) * TILE_SIZE)
+        enters_locked_room6_x = (not room6_unlocked) and _intersects_room(new_x, player.y, player.radius, map6_start_row, map6_start_col, map6_rows_count, map6_cols_count)
         enters_locked_room7_x = (not room7_unlocked) and _intersects_room(new_x, player.y, player.radius, map7_start_row, map7_start_col, map7_rows_count, map7_cols_count)
         enters_locked_room8_x = (not room8_unlocked) and _intersects_room(new_x, player.y, player.radius, map8_start_row, map8_start_col, map8_rows_count, map8_cols_count)
-        if not enters_locked_room5_x and not enters_locked_room7_x and not enters_locked_room8_x and not is_wall_collision(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2):
+        if not enters_locked_room5_x and not enters_locked_room6_x and not enters_locked_room7_x and not enters_locked_room8_x and not is_wall_collision(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2):
             player.x = new_x
         
         new_y = player.y + dy
         entering_locked_rows = (new_y - player.radius) < (unlocked_min_row * TILE_SIZE)
         enters_locked_room5_y = (not room5_unlocked) and (player.x + player.radius >= map5_start_col * TILE_SIZE) and (new_y + player.radius >= map5_start_row * TILE_SIZE) and (new_y - player.radius < (map5_start_row + map5_rows_count) * TILE_SIZE)
+        enters_locked_room6_y = (not room6_unlocked) and _intersects_room(player.x, new_y, player.radius, map6_start_row, map6_start_col, map6_rows_count, map6_cols_count)
         enters_locked_room7_y = (not room7_unlocked) and _intersects_room(player.x, new_y, player.radius, map7_start_row, map7_start_col, map7_rows_count, map7_cols_count)
         enters_locked_room8_y = (not room8_unlocked) and _intersects_room(player.x, new_y, player.radius, map8_start_row, map8_start_col, map8_rows_count, map8_cols_count)
-        if not entering_locked_rows and not enters_locked_room5_y and not enters_locked_room7_y and not enters_locked_room8_y and not is_wall_collision(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2):
+        if not entering_locked_rows and not enters_locked_room5_y and not enters_locked_room6_y and not enters_locked_room7_y and not enters_locked_room8_y and not is_wall_collision(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2):
             player.y = new_y
         
         if next_map_number in (2, 3, 4):
@@ -927,10 +943,14 @@ def main():
             near_room5_gate_y = player.y <= (map5_start_row + map5_rows_count) * TILE_SIZE
             show_popup = near_room5_gate_x and near_room5_gate_y
         elif next_map_number == 6:
+            near_room6_gate_x = player.x >= (map6_start_col * TILE_SIZE - 2 * TILE_SIZE)
+            near_room6_gate_y = player.y >= (map6_start_row * TILE_SIZE - TILE_SIZE) and player.y <= (map6_start_row + map6_rows_count) * TILE_SIZE
+            show_popup = near_room6_gate_x and near_room6_gate_y
+        elif next_map_number == 7:
             near_room7_gate_x = player.x >= (map7_start_col * TILE_SIZE - 2 * TILE_SIZE)
             near_room7_gate_y = player.y >= (map7_start_row * TILE_SIZE - TILE_SIZE) and player.y <= (map7_start_row + map7_rows_count) * TILE_SIZE
             show_popup = near_room7_gate_x and near_room7_gate_y
-        elif next_map_number == 7:
+        elif next_map_number == 8:
             near_room8_gate_x = player.x >= (map8_start_col * TILE_SIZE - 2 * TILE_SIZE)
             near_room8_gate_y = player.y >= (map8_start_row * TILE_SIZE - TILE_SIZE) and player.y <= (map8_start_row + map8_rows_count) * TILE_SIZE
             show_popup = near_room8_gate_x and near_room8_gate_y
@@ -1033,7 +1053,7 @@ def main():
 
         # ---------------- BOSS MOVEMENT ---------------- #
         if boss_spawned and boss is not None:
-            boss.follow_player(player)
+            boss.follow_player(player, speed=2.8)
 
             dx = player.x - boss.x
             dy = player.y - boss.y
@@ -1054,7 +1074,7 @@ def main():
         # ---------------- DRAWING ---------------- #
         screen.fill((255, 255, 255))
         
-        draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked)
+        draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked, room6_unlocked, room7_unlocked, room8_unlocked)
         draw_map_items(screen, view_offset_x, view_offset_y)
 
         # ---------------- BULLET COLLISION ---------------- #
@@ -1148,7 +1168,7 @@ def main():
             zombies[:] = [z for z in zombies if getattr(z, "wave_tag", "") != "wave1"]
 
         healthbar.draw()
-        draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked, minimap_x, minimap_y)
+        draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room6_unlocked, room7_unlocked, room8_unlocked, minimap_x, minimap_y)
 
         if show_popup:
             draw_unlock_prompt(screen, next_map_number)
