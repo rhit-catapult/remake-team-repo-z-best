@@ -459,14 +459,25 @@ def draw_level2_popup(screen, kills, elapsed_seconds):
     screen.blit(elapsed_text, (1300 / 2 - elapsed_text.get_width() / 2, 800 / 2 + 40))
 
 
-def draw_level3_popup(screen):
+def draw_level3_popup(screen, kills, elapsed_seconds):
     overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
     overlay.fill((25, 12, 40, 120))
     screen.blit(overlay, (0, 0))
 
-    popup_font = pygame.font.Font(None, 120)
-    level_text = popup_font.render("LEVEL 3", True, (240, 240, 240))
-    screen.blit(level_text, (1300 / 2 - level_text.get_width() / 2, 800 / 2 - level_text.get_height() / 2))
+    title_font = pygame.font.Font(None, 120)
+    stat_font = pygame.font.Font(None, 56)
+
+    mins = elapsed_seconds // 60
+    secs = elapsed_seconds % 60
+    time_text = f"Time: {mins:02d}:{secs:02d}"
+
+    stage_text = title_font.render("STAGE 3", True, (240, 240, 240))
+    kills_text = stat_font.render(f"Zombies Killed: {kills}", True, (225, 235, 245))
+    elapsed_text = stat_font.render(time_text, True, (225, 235, 245))
+
+    screen.blit(stage_text, (1300 / 2 - stage_text.get_width() / 2, 800 / 2 - 150))
+    screen.blit(kills_text, (1300 / 2 - kills_text.get_width() / 2, 800 / 2 - 20))
+    screen.blit(elapsed_text, (1300 / 2 - elapsed_text.get_width() / 2, 800 / 2 + 40))
 
 
 def draw_stage1_popup(screen):
@@ -693,6 +704,10 @@ def main():
     show_level3_popup = False
     level3_popup_started_at = 0
     level3_popup_duration_ms = 1800
+    stage2_started_at = None
+    stage2_kills_started = 0
+    stage3_summary_kills = 0
+    stage3_summary_time_s = 0
     show_stage1_popup = True
     stage1_popup_started_at = pygame.time.get_ticks()
     stage1_popup_duration_ms = 1800
@@ -766,6 +781,8 @@ def main():
                     next_map_number = 6
                     stage2_summary_kills = zombies_killed
                     stage2_summary_time_s = max(0, (pygame.time.get_ticks() - stage1_started_at) // 1000)
+                    stage2_started_at = pygame.time.get_ticks()
+                    stage2_kills_started = zombies_killed
                     show_level2_popup = True
                     level2_popup_started_at = pygame.time.get_ticks()
                 elif next_map_number == 6:
@@ -854,6 +871,11 @@ def main():
 
         if _player_in_room6_passage(player) and current_level < 3:
             current_level = 3
+            if stage2_started_at is not None:
+                stage3_summary_time_s = max(0, (pygame.time.get_ticks() - stage2_started_at) // 1000)
+            else:
+                stage3_summary_time_s = 0
+            stage3_summary_kills = max(0, zombies_killed - stage2_kills_started)
             show_level3_popup = True
             level3_popup_started_at = pygame.time.get_ticks()
 
@@ -1048,7 +1070,7 @@ def main():
             first_wave_completed = True
             current_level = max(current_level, 2)
             player.bullets.clear()
-            zombies.clear()
+            zombies[:] = [z for z in zombies if getattr(z, "wave_tag", "") != "wave1"]
 
         healthbar.draw()
         draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked, minimap_x, minimap_y)
@@ -1059,7 +1081,7 @@ def main():
         if show_level2_popup:
             draw_level2_popup(screen, stage2_summary_kills, stage2_summary_time_s)
         if show_level3_popup:
-            draw_level3_popup(screen)
+            draw_level3_popup(screen, stage3_summary_kills, stage3_summary_time_s)
         if show_stage1_popup:
             draw_stage1_popup(screen)
 
