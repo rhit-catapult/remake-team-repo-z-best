@@ -10,6 +10,7 @@ from maps import full_world_map, map1_start_row, map2_start_row, map3_start_row,
 from assets import TILE_SPRITES, ITEM_SPRITES
 from config import TILE_SIZE
 from collision import is_wall_collision, is_out_of_screen
+from boss_module import Boss_class
 
 # ---------------- START SCREEN ---------------- #
 
@@ -22,9 +23,8 @@ def start_screen(screen):
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            # CLICK ANYWHERE TO START
             if event.type == pygame.MOUSEBUTTONDOWN:
-                return  # start the game
+                return
 
         screen.blit(start_img, (0, 0))
         pygame.display.update()
@@ -41,10 +41,9 @@ def death_screen(screen):
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            # Allow clicking to restart AFTER 1 second
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.time.get_ticks() - start_time > 1000:
-                    return  # restart the game
+                    return
 
         screen.blit(death_img, (0, 0))
         pygame.display.update()
@@ -63,9 +62,9 @@ def spawn_zombies(screen, player, count=5):
             dy = player.y - y
             distance = math.hypot(dx, dy)
 
-            if distance > (player.radius + 100):  # safe buffer
+            if distance > (player.radius + 100):
                 zombie = Zombie(screen, x, y, "ZombieFIXED.png")
-                zombie.hp = 3  # 3 hits to kill
+                zombie.hp = 3
                 zombies.append(zombie)
                 break
 
@@ -75,7 +74,6 @@ def spawn_zombies(screen, player, count=5):
 # ---------------- MAP RENDERING ---------------- #
 
 def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked):
-    """Draw the complete map with camera offset"""
     view_cols = 1300 // TILE_SIZE
     view_rows = 800 // TILE_SIZE
     start_col = int(view_offset_x)
@@ -93,24 +91,22 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
                 tile_img = TILE_SPRITES[tile_id].copy()
-                # Darken any map rows that are still locked.
                 if row_idx < unlocked_min_row:
                     tile_img.set_alpha(55)
-                # Keep room 5 dark until it is explicitly unlocked.
                 if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
                     tile_img.set_alpha(55)
                 screen.blit(tile_img, (screen_x, screen_y))
 
+
 def draw_map_items(screen, view_offset_x, view_offset_y):
-    """Draw items on the map with camera offset"""
     for row, col, item_type in items:
         if item_type in ITEM_SPRITES:
             screen_x = col * TILE_SIZE - view_offset_x * TILE_SIZE
             screen_y = row * TILE_SIZE - view_offset_y * TILE_SIZE
             screen.blit(ITEM_SPRITES[item_type], (screen_x, screen_y))
 
+
 def draw_unlock_prompt(screen, next_map_number):
-    """Draw a contextual unlock prompt when near locked maps."""
     prompt_bg = pygame.Surface((420, 54), pygame.SRCALPHA)
     prompt_bg.fill((15, 15, 15, 190))
     screen.blit(prompt_bg, (1300 / 2 - 210, 24))
@@ -121,7 +117,6 @@ def draw_unlock_prompt(screen, next_map_number):
 
 
 def draw_level2_popup(screen):
-    """Draw a transparent LEVEL 2 overlay."""
     overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
     overlay.fill((10, 25, 40, 120))
     screen.blit(overlay, (0, 0))
@@ -135,24 +130,23 @@ def draw_level2_popup(screen):
 
 def main():
     current_level = 1
+    boss_spawned = False
+    boss = None
+
     pygame.init()
     pygame.display.set_caption("peanut apocolypse")
     screen = pygame.display.set_mode((1300, 800))
 
-    # FONT FOR LEVEL DISPLAY
     font = pygame.font.Font(None, 40)
 
-    # Load level clear PNG AFTER display is created
     level_clear_img = pygame.image.load("level_complete.png").convert_alpha()
     level_clear_img = pygame.transform.scale(level_clear_img, (600, 300))
 
-    # Show start screen first
     start_screen(screen)
 
     player = MainC(screen, TILE_SIZE * 6, TILE_SIZE * (map1_start_row + 4), "Character_Placeholder.png")
     healthbar = HealthBar(screen)
     
-    # Camera and map state
     view_offset_x = player.x / TILE_SIZE - (1300 // TILE_SIZE) / 2
     view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
     unlocked_min_row = map1_start_row
@@ -178,7 +172,6 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 player.fire()
             
-            # E key unlocks one map layer at a time.
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
                 if unlocked_min_row == map1_start_row:
                     unlocked_min_row = map2_start_row
@@ -198,7 +191,6 @@ def main():
 
         pressed_keys = pygame.key.get_pressed()
 
-        # Player movement with wall collision
         dx, dy = 0, 0
         if pressed_keys[pygame.K_w]:
             dy -= 5
@@ -209,20 +201,17 @@ def main():
         if pressed_keys[pygame.K_d]:
             dx += 5
         
-        # Check X movement collision
         new_x = player.x + dx
         enters_locked_room5_x = (not room5_unlocked) and (new_x + player.radius >= map5_start_col * TILE_SIZE) and (player.y + player.radius >= map5_start_row * TILE_SIZE) and (player.y - player.radius < (map5_start_row + map5_rows_count) * TILE_SIZE)
         if not enters_locked_room5_x and not is_wall_collision(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(new_x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2):
             player.x = new_x
         
-        # Check Y movement collision
         new_y = player.y + dy
         entering_locked_rows = (new_y - player.radius) < (unlocked_min_row * TILE_SIZE)
         enters_locked_room5_y = (not room5_unlocked) and (player.x + player.radius >= map5_start_col * TILE_SIZE) and (new_y + player.radius >= map5_start_row * TILE_SIZE) and (new_y - player.radius < (map5_start_row + map5_rows_count) * TILE_SIZE)
         if not entering_locked_rows and not enters_locked_room5_y and not is_wall_collision(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2) and not is_out_of_screen(player.x - player.radius, new_y - player.radius, player.radius * 2, player.radius * 2):
             player.y = new_y
         
-        # Show unlock prompt when approaching the current locked boundary.
         if next_map_number in (2, 3, 4):
             unlock_prompt_y = TILE_SIZE * (unlocked_min_row + 1)
             show_popup = player.y <= unlock_prompt_y
@@ -233,29 +222,25 @@ def main():
         else:
             show_popup = False
 
-        # Auto-hide LEVEL 2 popup after a short duration.
         if show_level2_popup and (pygame.time.get_ticks() - level2_popup_started_at >= level2_popup_duration_ms):
             show_level2_popup = False
         
-        # Update camera to follow player
         view_offset_x = player.x / TILE_SIZE - (1300 // TILE_SIZE) / 2
         view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
         
-        # Clamp camera to map bounds
         max_view_col = len(full_world_map[0]) - (1300 // TILE_SIZE)
         max_view_row = len(full_world_map) - (800 // TILE_SIZE)
         view_offset_x = max(0, min(view_offset_x, max_view_col))
         view_offset_y = max(0, min(view_offset_y, max_view_row))
 
         player.mouse_x, player.mouse_y = pygame.mouse.get_pos()
-        # Convert mouse screen coords to world coords for proper angle calculation
         player.mouse_x += int(view_offset_x * TILE_SIZE)
         player.mouse_y += int(view_offset_y * TILE_SIZE)
         player.update_angle()
 
         current_time = pygame.time.get_ticks()
 
-        # Zombie movement + collision with player
+        # ---------------- ZOMBIE MOVEMENT ---------------- #
         for zombie in zombies:
             zombie.follow_player(player)
             zombie.update_angle(player)
@@ -274,21 +259,41 @@ def main():
             if player.hp <= 0:
                 pygame.time.delay(1000)
                 death_screen(screen)
-                return main()  # restart the whole game
+                return main()
 
-        # Drawing
+        # ---------------- BOSS MOVEMENT ---------------- #
+        if boss_spawned and boss is not None:
+            boss.follow_player(player)
+            boss.update_angle(player)
+
+            dx = player.x - boss.x
+            dy = player.y - boss.y
+            distance = math.hypot(dx, dy)
+
+            if distance < (player.radius + boss.radius):
+                if current_time - player.last_hit_time > 1000:
+                    player.hp -= 1
+                    player.last_hit_time = current_time
+                    healthbar.set_hp(player.hp)
+                    hurt_sound.play()
+
+            if player.hp <= 0:
+                pygame.time.delay(1000)
+                death_screen(screen)
+                return main()
+
+        # ---------------- DRAWING ---------------- #
         screen.fill((255, 255, 255))
         
-        # Draw map first
         draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked)
         draw_map_items(screen, view_offset_x, view_offset_y)
 
-        # Bullet → Zombie collision
+        # ---------------- BULLET COLLISION ---------------- #
         for bullet in player.bullets[:]:
             bullet.move()
-            # Draw bullet with camera offset
             screen.blit(bullet.peanut, (bullet.bullet_x - view_offset_x * TILE_SIZE, bullet.bullet_y - view_offset_y * TILE_SIZE))
 
+            # Bullet → Zombie
             for zombie in zombies[:]:
                 dx = bullet.bullet_x - zombie.x
                 dy = bullet.bullet_y - zombie.y
@@ -301,22 +306,45 @@ def main():
                     if zombie.hp <= 0:
                         zombies.remove(zombie)
 
-                    break  # stop checking other zombies for this bullet
+                    break
 
-        # Draw player with camera offset
+            # Bullet → Boss
+            if boss_spawned and boss is not None:
+                dx = bullet.bullet_x - boss.x
+                dy = bullet.bullet_y - boss.y
+                distance = math.hypot(dx, dy)
+
+                if distance < boss.radius:
+                    boss.hp -= 1
+                    player.bullets.remove(bullet)
+
+                    if boss.hp <= 0:
+                        boss = None
+                        boss_spawned = False
+                        current_level += 1
+
+                    continue
+
+        # Draw player
         player.rect.center = (player.x - view_offset_x * TILE_SIZE, player.y - view_offset_y * TILE_SIZE)
         player.draw()
 
+        # Draw zombies
         for zombie in zombies:
-            # Draw zombie with camera offset
             old_x, old_y = zombie.rect.x, zombie.rect.y
             zombie.rect.center = (zombie.x - view_offset_x * TILE_SIZE, zombie.y - view_offset_y * TILE_SIZE)
             zombie.draw()
-            zombie.rect.x, zombie.rect.y = old_x, old_y  # restore for collision detection
+            zombie.rect.x, zombie.rect.y = old_x, old_y
+
+        # Draw boss
+        if boss_spawned and boss is not None:
+            old_x, old_y = boss.rect.x, boss.rect.y
+            boss.rect.center = (boss.x - view_offset_x * TILE_SIZE, boss.y - view_offset_y * TILE_SIZE)
+            boss.draw()
+            boss.rect.x, boss.rect.y = old_x, old_y
 
         # ---------------- LEVEL CLEAR CHECK ---------------- #
-        if len(zombies) == 0:
-            # Draw level clear image
+        if len(zombies) == 0 and not boss_spawned:
             screen.blit(level_clear_img, (350, 250))
             pygame.display.update()
 
@@ -332,23 +360,28 @@ def main():
 
                 pygame.time.delay(50)
 
-            # Start next level
             current_level += 1
-            player.bullets.clear()  # optional but recommended
-            zombies = spawn_zombies(screen, player, 5)
+            player.bullets.clear()
+
+            # Spawn boss at Level 5
+            if current_level == 5:
+                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 4)
+                boss.hp = 20
+                boss.radius = 70
+                boss_spawned = True
+            else:
+                zombies = spawn_zombies(screen, player, 5)
 
         healthbar.draw()
 
-        # Draw contextual unlock prompt near locked section
         if show_popup:
             draw_unlock_prompt(screen, next_map_number)
 
         if show_level2_popup:
             draw_level2_popup(screen)
 
-        # ---------------- DRAW LEVEL TEXT ---------------- #
         level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
-        screen.blit(level_text, (20, 760))  # bottom-left corner
+        screen.blit(level_text, (20, 760))
 
         pygame.display.update()
 

@@ -38,7 +38,7 @@ class level_title:
         self.screen.blit(pygame.image.load(image_filename), (self.x, self.y))
 
 
-class boss:
+class Boss_class:
     def __init__(self, screen, x, y, image_filename, hp, size):
         self.screen = screen            
         self.x = x
@@ -85,10 +85,10 @@ class boss:
 
 def test_character():
     screen = pygame.display.set_mode((1300, 800))
-    Jose = boss(screen, 200, 400, "Boss_Jose.png", 20, 4)
-    Autumn = boss(screen, 600, 400,"Boss_Autum.png", 35, 5.5)
-    Ethan = boss(screen, 1000, 400, "Boss_Ethan.png", 50, 7)
-    zombie = boss(screen, 100, 100, "Boss_Jose.png", 5, 2)
+    Jose = Boss_class(screen, 200, 400, "Boss_Jose.png", 20, 4)
+    Autumn = Boss_class(screen, 600, 400,"Boss_Autum.png", 35, 5.5)
+    Ethan = Boss_class(screen, 1000, 400, "Boss_Ethan.png", 50, 7)
+    zombie = Boss_class(screen, 100, 100, "Boss_Jose.png", 5, 2)
     title = level_title(screen, 10)
     while True:
         for event in pygame.event.get():
