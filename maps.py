@@ -37,14 +37,14 @@ map_data_3 = [
 ]
 
 map_data_4 = [
-    [1,1,1,1,0,0,0,0,0,1,1,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,0,0,0,0,0,0,0,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,0,1,1],
     
 ]
 
@@ -70,10 +70,10 @@ map4_padded = [row[:] for row in map_data_4]
 map5_padded = [row[:] for row in map_data_5]
 
 while len(map4_padded) < top_section_rows:
-    map4_padded.append([1] * map4_width)
+    map4_padded.append([0] * map4_width)
 
 while len(map5_padded) < top_section_rows:
-    map5_padded.append([4] * map5_width)
+    map5_padded.append([2] * map5_width)
 
 map_data_4_5 = [left_row + right_row for left_row, right_row in zip(map4_padded, map5_padded)]
 
