@@ -532,9 +532,9 @@ def main():
 
             # Spawn boss at Level 5
             if current_level == 5:
-                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 4)
+                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 5.5)
                 boss.hp = 20
-                boss.radius = 70
+                boss.radius = (boss.image.get_width() / 2) + 2
                 boss_spawned = True
             else:
                 zombies = spawn_zombies(screen, player, 5)
