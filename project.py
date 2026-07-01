@@ -62,29 +62,13 @@ def spawn_zombies(screen, player, count=5):
             dx = player.x - x
             dy = player.y - y
             distance = math.hypot(dx, dy)
-
-#<<<<<<< HEAD
-#<<<<<<< HEAD
-            if distance > (player.radius + 100):
-#=======
-                collides_with_map = is_wall_collision(
-                    x - spawn_radius,
-                    y - spawn_radius,
-                    spawn_radius * 2,
-                    spawn_radius * 2,
-#=======
             collides_with_map = is_wall_collision(
                 x - spawn_radius,
                 y - spawn_radius,
                 spawn_radius * 2,
                 spawn_radius * 2,
-#>>>>>>> 11519016f43af35cfe3b25aa6de108a17947ae11
             )
             if distance > (player.radius + 100) and not collides_with_map:  # safe buffer + valid spawn tile
-<<<<<<< HEAD
-#>>>>>>> 6f8a55e8a833222b2c2a80bb274c30da3d1462bc
-=======
->>>>>>> 11519016f43af35cfe3b25aa6de108a17947ae11
                 zombie = Zombie(screen, x, y, "ZombieFIXED.png")
                 zombie.hp = 3
                 zombies.append(zombie)
@@ -137,17 +121,9 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
             if tile_id in TILE_SPRITES:
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
-<<<<<<< HEAD
-                tile_img = TILE_SPRITES[tile_id].copy()
-                if row_idx < unlocked_min_row:
-                    tile_img.set_alpha(55)
-=======
                 should_darken = False
-                # Darken any map rows that are still locked.
                 if row_idx < unlocked_min_row:
                     should_darken = True
-                # Keep room 5 dark until it is explicitly unlocked.
->>>>>>> 11519016f43af35cfe3b25aa6de108a17947ae11
                 if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
                     should_darken = True
 
