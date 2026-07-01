@@ -53,6 +53,7 @@ def death_screen(screen):
 
 def spawn_zombies(screen, player, count=5):
     zombies = []
+    spawn_radius = 40
     for _ in range(count):
         while True:
             x = random.randint(50, 1250)
@@ -62,7 +63,18 @@ def spawn_zombies(screen, player, count=5):
             dy = player.y - y
             distance = math.hypot(dx, dy)
 
+<<<<<<< HEAD
             if distance > (player.radius + 100):
+=======
+            collides_with_map = is_wall_collision(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+            )
+
+            if distance > (player.radius + 100) and not collides_with_map:  # safe buffer + valid spawn tile
+>>>>>>> 6f8a55e8a833222b2c2a80bb274c30da3d1462bc
                 zombie = Zombie(screen, x, y, "ZombieFIXED.png")
                 zombie.hp = 3
                 zombies.append(zombie)
@@ -72,6 +84,31 @@ def spawn_zombies(screen, player, count=5):
 
 
 # ---------------- MAP RENDERING ---------------- #
+
+def _is_fence_tile(row_idx, col_idx):
+    """Return True when the map tile exists and is a fence tile."""
+    if row_idx < 0 or row_idx >= len(full_world_map):
+        return False
+    row = full_world_map[row_idx]
+    if col_idx < 0 or col_idx >= len(row):
+        return False
+    return row[col_idx] == 4
+
+
+def _get_fence_overlay(row_idx, col_idx):
+    """Rotate fence sprite to match neighbor direction where possible."""
+    up = _is_fence_tile(row_idx - 1, col_idx)
+    down = _is_fence_tile(row_idx + 1, col_idx)
+    left = _is_fence_tile(row_idx, col_idx - 1)
+    right = _is_fence_tile(row_idx, col_idx + 1)
+
+    fence_img = TILE_SPRITES[4].copy()
+
+    # If this segment connects mostly vertically, rotate the fence texture.
+    if (up or down) and not (left or right):
+        fence_img = pygame.transform.rotate(fence_img, 90)
+
+    return fence_img
 
 def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked):
     view_cols = 1300 // TILE_SIZE
@@ -90,12 +127,35 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
             if tile_id in TILE_SPRITES:
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
+<<<<<<< HEAD
                 tile_img = TILE_SPRITES[tile_id].copy()
                 if row_idx < unlocked_min_row:
                     tile_img.set_alpha(55)
+=======
+                should_darken = False
+                # Darken any map rows that are still locked.
+                if row_idx < unlocked_min_row:
+                    should_darken = True
+                # Keep room 5 dark until it is explicitly unlocked.
+>>>>>>> 6f8a55e8a833222b2c2a80bb274c30da3d1462bc
                 if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
-                    tile_img.set_alpha(55)
-                screen.blit(tile_img, (screen_x, screen_y))
+                    should_darken = True
+
+                # Fence tile uses grass as base with a transparent fence overlay.
+                if tile_id == 4:
+                    base_img = TILE_SPRITES[2].copy()
+                    fence_img = _get_fence_overlay(row_idx, col_idx)
+                    if should_darken:
+                        base_img.set_alpha(55)
+                        fence_img.set_alpha(55)
+                    screen.blit(base_img, (screen_x, screen_y))
+                    # Slight overlap helps hide seams at tile boundaries.
+                    screen.blit(fence_img, (screen_x - 1, screen_y - 1))
+                else:
+                    tile_img = TILE_SPRITES[tile_id].copy()
+                    if should_darken:
+                        tile_img.set_alpha(55)
+                    screen.blit(tile_img, (screen_x, screen_y))
 
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
@@ -126,6 +186,66 @@ def draw_level2_popup(screen):
     screen.blit(level_text, (1300 / 2 - level_text.get_width() / 2, 800 / 2 - level_text.get_height() / 2))
 
 
+def draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, x, y):
+    """Draw a full-map minimap with player/zombie markers and lock shading."""
+    map_rows = len(full_world_map)
+    map_cols = len(full_world_map[0])
+
+    panel_w = 250
+    panel_h = 200
+    padding = 8
+
+    playable_w = panel_w - padding * 2
+    playable_h = panel_h - padding * 2
+    cell_size = min(playable_w / map_cols, playable_h / map_rows)
+
+    minimap_w = map_cols * cell_size
+    minimap_h = map_rows * cell_size
+    map_x = x + (panel_w - minimap_w) / 2
+    map_y = y + (panel_h - minimap_h) / 2
+
+    panel = pygame.Surface((panel_w, panel_h), pygame.SRCALPHA)
+    panel.fill((10, 10, 10, 165))
+    screen.blit(panel, (x, y))
+    pygame.draw.rect(screen, (210, 210, 210), (x, y, panel_w, panel_h), 2)
+
+    tile_colors = {
+        0: (205, 205, 205),
+        1: (95, 95, 95),
+        2: (85, 155, 85),
+        3: (150, 75, 75),
+        4: (100, 140, 80),
+    }
+
+    for row_idx, row_data in enumerate(full_world_map):
+        for col_idx, tile_id in enumerate(row_data):
+            color = tile_colors.get(tile_id, (120, 120, 120))
+
+            # Match main-map lock behavior: locked rooms remain dark on minimap.
+            if row_idx < unlocked_min_row:
+                color = (color[0] // 4, color[1] // 4, color[2] // 4)
+            if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
+                color = (color[0] // 4, color[1] // 4, color[2] // 4)
+
+            tile_rect = pygame.Rect(
+                map_x + col_idx * cell_size,
+                map_y + row_idx * cell_size,
+                max(1, cell_size + 0.2),
+                max(1, cell_size + 0.2),
+            )
+            pygame.draw.rect(screen, color, tile_rect)
+
+    # Draw zombies first so player marker stays visible on top.
+    for zombie in zombies:
+        zx = map_x + (zombie.x / TILE_SIZE) * cell_size
+        zy = map_y + (zombie.y / TILE_SIZE) * cell_size
+        pygame.draw.circle(screen, (210, 55, 55), (int(zx), int(zy)), 3)
+
+    px = map_x + (player.x / TILE_SIZE) * cell_size
+    py = map_y + (player.y / TILE_SIZE) * cell_size
+    pygame.draw.circle(screen, (70, 200, 255), (int(px), int(py)), 4)
+
+
 # ---------------- MAIN GAME ---------------- #
 
 def main():
@@ -146,6 +266,8 @@ def main():
 
     player = MainC(screen, TILE_SIZE * 6, TILE_SIZE * (map1_start_row + 4), "Character_Placeholder.png")
     healthbar = HealthBar(screen)
+    minimap_x = 20
+    minimap_y = 20 + healthbar.images[4].get_height() + 12
     
     view_offset_x = player.x / TILE_SIZE - (1300 // TILE_SIZE) / 2
     view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
@@ -373,6 +495,7 @@ def main():
                 zombies = spawn_zombies(screen, player, 5)
 
         healthbar.draw()
+        draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, minimap_x, minimap_y)
 
         if show_popup:
             draw_unlock_prompt(screen, next_map_number)

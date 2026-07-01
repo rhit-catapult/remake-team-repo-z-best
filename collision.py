@@ -2,6 +2,9 @@
 from config import TILE_SIZE
 from maps import full_world_map
 
+# Tile IDs that block movement.
+COLLIDABLE_TILES = {1, 4}
+
 def is_wall_collision(x, y, w, h):
     """Check if position collides with walls"""
     left_col = int(x // TILE_SIZE)
@@ -15,7 +18,7 @@ def is_wall_collision(x, y, w, h):
         for c in range(left_col, right_col + 1):
             if c < 0 or c >= len(full_world_map[r]):
                 continue
-            if full_world_map[r][c] in (1, 4):
+            if full_world_map[r][c] in COLLIDABLE_TILES:
                 return True
     return False
 
