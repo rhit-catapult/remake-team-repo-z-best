@@ -54,6 +54,7 @@ def death_screen(screen):
 
 def spawn_zombies(screen, player, count=5):
     zombies = []
+    spawn_radius = 40
     for _ in range(count):
         while True:
             x = random.randint(50, 1250)
@@ -63,7 +64,14 @@ def spawn_zombies(screen, player, count=5):
             dy = player.y - y
             distance = math.hypot(dx, dy)
 
-            if distance > (player.radius + 100):  # safe buffer
+            collides_with_map = is_wall_collision(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+            )
+
+            if distance > (player.radius + 100) and not collides_with_map:  # safe buffer + valid spawn tile
                 zombie = Zombie(screen, x, y, "ZombieFIXED.png")
                 zombie.hp = 3  # 3 hits to kill
                 zombies.append(zombie)
