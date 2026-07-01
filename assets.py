@@ -17,11 +17,12 @@ tile_grass = load_image("grass-tile.png", (TILE_SIZE, TILE_SIZE))
 tile_fence = load_image("fence.png", (TILE_SIZE, TILE_SIZE), use_alpha=True)
 box = load_image("box.png", (TILE_SIZE, TILE_SIZE), use_alpha=True)
 corpse = load_image("dead_Zombie.png", (CORPSE_SIZE, TILE_SIZE), use_alpha=True)
+jj_junior = load_image("JJ_Junior.png", (TILE_SIZE, TILE_SIZE), use_alpha=True)
 player = load_image("Character_Placeholder.png", (TILE_SIZE, TILE_SIZE), use_alpha=True)
 
 
 # Tile ID to sprite mapping (0=floor, 1=wall, 2=grass, 3=blood)
 TILE_SPRITES = {0: tile_floor, 1: tile_wall, 2: tile_grass, 3: tile_floor_blood, 4:tile_fence}
 
-# Item type to sprite mapping (10=box, 20=corpse)
-ITEM_SPRITES = {10: box, 20: corpse}
+# Item type to sprite mapping (10=box, 20=corpse, 30=JJ junior)
+ITEM_SPRITES = {10: box, 20: corpse, 30: jj_junior}

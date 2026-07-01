@@ -201,9 +201,10 @@ room6_passage_end_col = map4_width + map5_width + 5
 locked_rows_count = map1_start_row
 
 # Items: (row, column, item_type)
-# 10=box, 20=corpse
+# 10=box, 20=corpse, 30=JJ junior
 items = [
     (map1_start_row + 6, 9, 10),  # Box in map1
     (map1_start_row + 6, 10, 10),
-    (map1_start_row + 6, 6, 20)   # Corpse in map1
+    (map1_start_row + 6, 6, 20),  # Corpse in map1
+    (map8_start_row + map8_rows_count - 1, map8_start_col + map8_cols_count - 1, 30),  # JJ junior in final room bottom-right
 ]
