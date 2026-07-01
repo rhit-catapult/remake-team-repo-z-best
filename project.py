@@ -92,14 +92,28 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
             if tile_id in TILE_SPRITES:
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
-                tile_img = TILE_SPRITES[tile_id].copy()
+                should_darken = False
                 # Darken any map rows that are still locked.
                 if row_idx < unlocked_min_row:
-                    tile_img.set_alpha(55)
+                    should_darken = True
                 # Keep room 5 dark until it is explicitly unlocked.
                 if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
-                    tile_img.set_alpha(55)
-                screen.blit(tile_img, (screen_x, screen_y))
+                    should_darken = True
+
+                # Fence tile uses grass as base with a transparent fence overlay.
+                if tile_id == 4:
+                    base_img = TILE_SPRITES[2].copy()
+                    fence_img = TILE_SPRITES[4].copy()
+                    if should_darken:
+                        base_img.set_alpha(55)
+                        fence_img.set_alpha(55)
+                    screen.blit(base_img, (screen_x, screen_y))
+                    screen.blit(fence_img, (screen_x, screen_y))
+                else:
+                    tile_img = TILE_SPRITES[tile_id].copy()
+                    if should_darken:
+                        tile_img.set_alpha(55)
+                    screen.blit(tile_img, (screen_x, screen_y))
 
 def draw_map_items(screen, view_offset_x, view_offset_y):
     """Draw items on the map with camera offset"""
