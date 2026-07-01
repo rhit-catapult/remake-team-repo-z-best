@@ -293,6 +293,72 @@ def draw_pause_popup(screen, zombies_killed):
     screen.blit(hint_text, (1300 / 2 - hint_text.get_width() / 2, panel_y + 180))
 
 
+def draw_zombie_health_bar(screen, zombie, view_offset_x, view_offset_y):
+    max_hp = 3
+    hp = max(0, min(zombie.hp, max_hp))
+
+    bar_width = 54
+    bar_height = 7
+    border = 1
+
+    screen_x = zombie.x - view_offset_x * TILE_SIZE
+    screen_y = zombie.y - view_offset_y * TILE_SIZE
+
+    bar_x = int(screen_x - bar_width / 2)
+    bar_y = int(screen_y - zombie.radius - 16)
+
+    pygame.draw.rect(screen, (18, 18, 18), (bar_x - border, bar_y - border, bar_width + border * 2, bar_height + border * 2))
+    pygame.draw.rect(screen, (120, 30, 30), (bar_x, bar_y, bar_width, bar_height))
+
+    if hp > 0:
+        fill_width = int((hp / max_hp) * bar_width)
+        pygame.draw.rect(screen, (60, 220, 90), (bar_x, bar_y, fill_width, bar_height))
+
+    text_font = pygame.font.Font(None, 18)
+    hp_text = text_font.render(f"{hp}/{max_hp}", True, (240, 240, 240))
+    text_x = int(screen_x - hp_text.get_width() / 2)
+    text_y = bar_y - hp_text.get_height() - 1
+    screen.blit(hp_text, (text_x, text_y))
+
+
+def draw_boss_health_bar(screen, boss, max_hp, view_offset_x, view_offset_y):
+    if max_hp <= 0:
+        return
+
+    hp = max(0, min(boss.hp, max_hp))
+    hp_ratio = hp / max_hp
+
+    bar_width = 130
+    bar_height = 10
+    border = 2
+
+    screen_x = boss.x - view_offset_x * TILE_SIZE
+    screen_y = boss.y - view_offset_y * TILE_SIZE
+
+    bar_x = int(screen_x - bar_width / 2)
+    bar_y = int(screen_y - boss.radius - 24)
+
+    if hp_ratio <= 0.35:
+        hp_color = (220, 52, 52)
+    elif hp_ratio <= 0.65:
+        hp_color = (232, 182, 48)
+    else:
+        hp_color = (76, 214, 108)
+
+    pygame.draw.rect(screen, (14, 14, 14), (bar_x - border, bar_y - border, bar_width + border * 2, bar_height + border * 2))
+    pygame.draw.rect(screen, (95, 30, 30), (bar_x, bar_y, bar_width, bar_height))
+
+    if hp > 0:
+        fill_width = int(hp_ratio * bar_width)
+        pygame.draw.rect(screen, hp_color, (bar_x, bar_y, fill_width, bar_height))
+
+    text_font = pygame.font.Font(None, 24)
+    hp_text = text_font.render(f"{hp}/{max_hp}", True, (240, 240, 240))
+    text_x = int(screen_x - hp_text.get_width() / 2)
+    text_y = bar_y - hp_text.get_height() - 2
+    screen.blit(hp_text, (text_x, text_y))
+
+
 def draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked, x, y):
     """Draw a full-map minimap with player/zombie markers and lock shading."""
     map_rows = len(full_world_map)
@@ -363,6 +429,7 @@ def main():
     current_level = 1
     boss_spawned = False
     boss = None
+    boss_max_hp = 0
 
     pygame.init()
     pygame.display.set_caption("peanut apocolypse")
@@ -460,6 +527,7 @@ def main():
                 zombie.rect.center = (zombie.x - view_offset_x * TILE_SIZE, zombie.y - view_offset_y * TILE_SIZE)
                 zombie.draw()
                 zombie.rect.x, zombie.rect.y = old_x, old_y
+                draw_zombie_health_bar(screen, zombie, view_offset_x, view_offset_y)
 
             healthbar.draw()
             draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, room7_unlocked, room8_unlocked, minimap_x, minimap_y)
@@ -502,12 +570,12 @@ def main():
             near_room5_gate_y = player.y <= (map5_start_row + map5_rows_count) * TILE_SIZE
             show_popup = near_room5_gate_x and near_room5_gate_y
         elif next_map_number == 6:
-            near_room7_gate_x = player.x >= (map7_start_col * TILE_SIZE - TILE_SIZE)
-            near_room7_gate_y = player.y >= map7_start_row * TILE_SIZE and player.y <= (map7_start_row + map7_rows_count) * TILE_SIZE
+            near_room7_gate_x = player.x >= (map7_start_col * TILE_SIZE - 2 * TILE_SIZE)
+            near_room7_gate_y = player.y >= (map7_start_row * TILE_SIZE - TILE_SIZE) and player.y <= (map7_start_row + map7_rows_count) * TILE_SIZE
             show_popup = near_room7_gate_x and near_room7_gate_y
         elif next_map_number == 7:
-            near_room8_gate_x = player.x >= (map8_start_col * TILE_SIZE - TILE_SIZE)
-            near_room8_gate_y = player.y >= map8_start_row * TILE_SIZE and player.y <= (map8_start_row + map8_rows_count) * TILE_SIZE
+            near_room8_gate_x = player.x >= (map8_start_col * TILE_SIZE - 2 * TILE_SIZE)
+            near_room8_gate_y = player.y >= (map8_start_row * TILE_SIZE - TILE_SIZE) and player.y <= (map8_start_row + map8_rows_count) * TILE_SIZE
             show_popup = near_room8_gate_x and near_room8_gate_y
         else:
             show_popup = False
@@ -641,6 +709,7 @@ def main():
             zombie.rect.center = (zombie.x - view_offset_x * TILE_SIZE, zombie.y - view_offset_y * TILE_SIZE)
             zombie.draw()
             zombie.rect.x, zombie.rect.y = old_x, old_y
+            draw_zombie_health_bar(screen, zombie, view_offset_x, view_offset_y)
 
         # Draw boss
         if boss_spawned and boss is not None:
@@ -648,6 +717,7 @@ def main():
             boss.rect.center = (boss.x - view_offset_x * TILE_SIZE, boss.y - view_offset_y * TILE_SIZE)
             boss.draw()
             boss.rect.x, boss.rect.y = old_x, old_y
+            draw_boss_health_bar(screen, boss, boss_max_hp, view_offset_x, view_offset_y)
 
         # ---------------- LEVEL CLEAR CHECK ---------------- #
         if len(zombies) == 0 and not boss_spawned:
@@ -673,6 +743,7 @@ def main():
             if current_level == 5:
                 boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 5.1)
                 boss.hp = 20
+                boss_max_hp = boss.hp
                 boss.radius = (boss.image.get_width() / 2) + 2
                 boss_spawned = True
             else:
