@@ -362,6 +362,42 @@ def spawn_corner_zombies_in_room(screen, player, count, room_start_row, room_sta
     return zombies
 
 
+def spawn_zombies_around_boss(screen, player, boss, count=3):
+    zombies = []
+    spawn_radius = 40
+
+    for _ in range(count):
+        for _attempt in range(120):
+            angle = random.uniform(0, math.tau)
+            distance = random.randint(120, 190)
+
+            x = int(boss.x + math.cos(angle) * distance)
+            y = int(boss.y + math.sin(angle) * distance)
+
+            collides_with_map = is_wall_collision(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+            )
+            out_of_bounds = is_out_of_screen(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+            )
+            if collides_with_map or out_of_bounds:
+                continue
+
+            zombie = Zombie(screen, x, y, "ZombieFIXED.png")
+            zombie.hp = 3
+            zombie.wave_tag = "autum_summon"
+            zombies.append(zombie)
+            break
+
+    return zombies
+
+
 def keep_zombie_in_room(zombie, room_start_row, room_start_col, room_rows, room_cols):
     min_x = room_start_col * TILE_SIZE + zombie.radius
     max_x = (room_start_col + room_cols) * TILE_SIZE - zombie.radius
@@ -734,6 +770,11 @@ def main():
     boss_spawned = False
     boss = None
     boss_max_hp = 0
+    boss_autum_spawned = False
+    boss_autum = None
+    boss_autum_max_hp = 0
+    autum_summon_interval_ms = 10000
+    autum_last_summon_at = 0
 
     pygame.init()
     pygame.display.set_caption("peanut apocolypse")
@@ -873,6 +914,15 @@ def main():
                     level2_popup_started_at = pygame.time.get_ticks()
                 elif next_map_number == 6:
                     room6_unlocked = True
+                    if not boss_autum_spawned:
+                        autum_spawn_x = TILE_SIZE * (map6_start_col + map6_cols_count // 2)
+                        autum_spawn_y = TILE_SIZE * (map6_start_row + map6_rows_count // 2)
+                        boss_autum = Boss_class(screen, autum_spawn_x, autum_spawn_y, "Boss_Autum.png", 60, 6.5)
+                        boss_autum.hp = 60
+                        boss_autum_max_hp = boss_autum.hp
+                        boss_autum.radius = (boss_autum.image.get_width() / 2) + 2
+                        boss_autum_spawned = True
+                        autum_last_summon_at = pygame.time.get_ticks()
                     next_map_number = 7
                 elif next_map_number == 7:
                     room7_unlocked = True
@@ -1054,12 +1104,37 @@ def main():
         # ---------------- BOSS MOVEMENT ---------------- #
         if boss_spawned and boss is not None:
             boss.follow_player(player, speed=2.8)
+            boss.update_angle(player)
 
             dx = player.x - boss.x
             dy = player.y - boss.y
             distance = math.hypot(dx, dy)
 
             if distance < (player.radius + boss.radius):
+                if current_time - player.last_hit_time > 1000:
+                    player.hp -= 1
+                    player.last_hit_time = current_time
+                    healthbar.set_hp(player.hp)
+                    hurt_sound.play()
+
+            if player.hp <= 0:
+                pygame.time.delay(1000)
+                death_screen(screen)
+                return main()
+
+        if boss_autum_spawned and boss_autum is not None:
+            boss_autum.follow_player(player, speed=3.8)
+            boss_autum.update_angle(player)
+
+            if current_time - autum_last_summon_at >= autum_summon_interval_ms:
+                zombies.extend(spawn_zombies_around_boss(screen, player, boss_autum, 3))
+                autum_last_summon_at = current_time
+
+            dx = player.x - boss_autum.x
+            dy = player.y - boss_autum.y
+            distance = math.hypot(dx, dy)
+
+            if distance < (player.radius + boss_autum.radius):
                 if current_time - player.last_hit_time > 1000:
                     player.hp -= 1
                     player.last_hit_time = current_time
@@ -1126,6 +1201,22 @@ def main():
 
                     continue
 
+            if boss_autum_spawned and boss_autum is not None:
+                dx = bullet.bullet_x - boss_autum.x
+                dy = bullet.bullet_y - boss_autum.y
+                distance = math.hypot(dx, dy)
+
+                if distance < boss_autum.radius:
+                    boss_autum.hp -= 1
+                    player.bullets.remove(bullet)
+
+                    if boss_autum.hp <= 0:
+                        boss_autum = None
+                        boss_autum_spawned = False
+                        current_level = max(current_level, 4)
+
+                    continue
+
         # Draw player
         player.rect.center = (player.x - view_offset_x * TILE_SIZE, player.y - view_offset_y * TILE_SIZE)
         player.draw()
@@ -1145,6 +1236,13 @@ def main():
             boss.draw()
             boss.rect.x, boss.rect.y = old_x, old_y
             draw_boss_health_bar(screen, boss, boss_max_hp, view_offset_x, view_offset_y)
+
+        if boss_autum_spawned and boss_autum is not None:
+            old_x, old_y = boss_autum.rect.x, boss_autum.rect.y
+            boss_autum.rect.center = (boss_autum.x - view_offset_x * TILE_SIZE, boss_autum.y - view_offset_y * TILE_SIZE)
+            boss_autum.draw()
+            boss_autum.rect.x, boss_autum.rect.y = old_x, old_y
+            draw_boss_health_bar(screen, boss_autum, boss_autum_max_hp, view_offset_x, view_offset_y)
 
         # ---------------- LEVEL CLEAR CHECK ---------------- #
         wave1_alive = any(getattr(zombie, "wave_tag", "") == "wave1" for zombie in zombies)
