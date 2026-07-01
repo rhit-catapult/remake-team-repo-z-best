@@ -107,6 +107,18 @@ def _player_in_room6_passage(player):
     return full_world_map[row_idx][col_idx] not in (1, 4)
 
 
+def _player_in_room3(player):
+    return _intersects_room(
+        player.x,
+        player.y,
+        player.radius,
+        map3_start_row,
+        map3_start_col,
+        map3_room_rows_count,
+        map3_room_cols_count,
+    )
+
+
 def _intersects_room(player_x, player_y, radius, room_start_row, room_start_col, room_rows, room_cols):
     left = player_x - radius
     right = player_x + radius
@@ -216,6 +228,64 @@ def spawn_patrol_zombies_in_room(screen, player, count, room_start_row, room_sta
                 zombie.wave_tag = "room2_patrol"
                 zombies.append(zombie)
                 break
+
+    return zombies
+
+
+def spawn_corner_zombies_in_room(screen, player, count, room_start_row, room_start_col, room_rows, room_cols):
+    zombies = []
+    spawn_radius = 40
+
+    room_left = room_start_col * TILE_SIZE
+    room_right = (room_start_col + room_cols) * TILE_SIZE
+    room_top = room_start_row * TILE_SIZE
+    room_bottom = (room_start_row + room_rows) * TILE_SIZE
+
+    corners = [
+        (room_left + spawn_radius + 30, room_top + spawn_radius + 30),
+        (room_right - spawn_radius - 30, room_top + spawn_radius + 30),
+        (room_left + spawn_radius + 30, room_bottom - spawn_radius - 30),
+        (room_right - spawn_radius - 30, room_bottom - spawn_radius - 30),
+    ]
+
+    for idx in range(count):
+        base_x, base_y = corners[idx % len(corners)]
+        placed = False
+
+        for _attempt in range(120):
+            x = int(base_x + random.randint(-35, 35))
+            y = int(base_y + random.randint(-35, 35))
+
+            x = max(int(room_left + spawn_radius), min(x, int(room_right - spawn_radius)))
+            y = max(int(room_top + spawn_radius), min(y, int(room_bottom - spawn_radius)))
+
+            collides_with_map = is_wall_collision(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+            )
+            if collides_with_map:
+                continue
+
+            dx = player.x - x
+            dy = player.y - y
+            if math.hypot(dx, dy) <= (player.radius + 100):
+                continue
+
+            zombie = Zombie(screen, x, y, "ZombieFIXED.png")
+            zombie.hp = 3
+            zombie.wave_tag = "wave1"
+            zombies.append(zombie)
+            placed = True
+            break
+
+        if not placed:
+            # Fallback: force place at the base corner location.
+            zombie = Zombie(screen, int(base_x), int(base_y), "ZombieFIXED.png")
+            zombie.hp = 3
+            zombie.wave_tag = "wave1"
+            zombies.append(zombie)
 
     return zombies
 
@@ -443,7 +513,13 @@ def draw_zombie_health_bar(screen, zombie, view_offset_x, view_offset_y):
 
     if hp > 0:
         fill_width = int((hp / max_hp) * bar_width)
-        pygame.draw.rect(screen, (60, 220, 90), (bar_x, bar_y, fill_width, bar_height))
+        if hp <= 1:
+            hp_color = (220, 55, 55)
+        elif hp == 2:
+            hp_color = (235, 150, 45)
+        else:
+            hp_color = (60, 220, 90)
+        pygame.draw.rect(screen, hp_color, (bar_x, bar_y, fill_width, bar_height))
 
     text_font = pygame.font.Font(None, 18)
     hp_text = text_font.render(f"{hp}/{max_hp}", True, (240, 240, 240))
@@ -602,6 +678,8 @@ def main():
     stage1_popup_duration_ms = 1800
     first_wave_started = False
     first_wave_completed = False
+    room3_entry_started_at = None
+    room3_chase_delay_ms = 3000
     map2_start_col = 0
     map2_room_rows_count = map1_start_row - map2_start_row
     map2_room_cols_count = map3_room_cols_count
@@ -634,8 +712,21 @@ def main():
                 if unlocked_min_row == map1_start_row:
                     unlocked_min_row = map2_start_row
                     next_map_number = 3
+                    patrol_zombies = spawn_patrol_zombies_in_room(
+                        screen,
+                        player,
+                        3,
+                        map2_start_row,
+                        map2_start_col,
+                        map2_room_rows_count,
+                        map2_room_cols_count,
+                    )
+                    zombies.extend(patrol_zombies)
+                elif unlocked_min_row == map2_start_row:
+                    unlocked_min_row = map3_start_row
+                    next_map_number = 4
                     if not first_wave_started:
-                        wave1_zombies = spawn_zombies_in_room(
+                        wave1_zombies = spawn_corner_zombies_in_room(
                             screen,
                             player,
                             5,
@@ -644,24 +735,9 @@ def main():
                             map3_room_rows_count,
                             map3_room_cols_count,
                         )
-                        for zombie in wave1_zombies:
-                            zombie.wave_tag = "wave1"
-
-                        patrol_zombies = spawn_patrol_zombies_in_room(
-                            screen,
-                            player,
-                            3,
-                            map2_start_row,
-                            map2_start_col,
-                            map2_room_rows_count,
-                            map2_room_cols_count,
-                        )
-
-                        zombies = wave1_zombies + patrol_zombies
+                        zombies.extend(wave1_zombies)
                         first_wave_started = True
-                elif unlocked_min_row == map2_start_row:
-                    unlocked_min_row = map3_start_row
-                    next_map_number = 4
+                        room3_entry_started_at = None
                 elif unlocked_min_row == map3_start_row:
                     unlocked_min_row = map4_start_row
                     next_map_number = 5
@@ -760,6 +836,23 @@ def main():
             current_level = 3
             show_level3_popup = True
             level3_popup_started_at = pygame.time.get_ticks()
+
+        if first_wave_started and (not first_wave_completed) and room3_entry_started_at is None and _player_in_room3(player):
+            room3_entry_started_at = pygame.time.get_ticks()
+
+        if (not first_wave_started) and unlocked_min_row <= map3_start_row and _player_in_room3(player):
+            wave1_zombies = spawn_corner_zombies_in_room(
+                screen,
+                player,
+                5,
+                map3_start_row,
+                map3_start_col,
+                map3_room_rows_count,
+                map3_room_cols_count,
+            )
+            zombies.extend(wave1_zombies)
+            first_wave_started = True
+            room3_entry_started_at = pygame.time.get_ticks()
         
         view_offset_x = player.x / TILE_SIZE - (1300 // TILE_SIZE) / 2
         view_offset_y = player.y / TILE_SIZE - (800 // TILE_SIZE) / 2
@@ -778,6 +871,10 @@ def main():
 
         # ---------------- ZOMBIE MOVEMENT ---------------- #
         room3_locked = unlocked_min_row > map3_start_row
+        room3_chase_active = (
+            room3_entry_started_at is not None
+            and (current_time - room3_entry_started_at) >= room3_chase_delay_ms
+        )
         for zombie in zombies:
             if getattr(zombie, "patrol_mode", False):
                 move_patrol_zombie(
@@ -788,8 +885,9 @@ def main():
                     map2_room_cols_count,
                 )
             else:
-                zombie.follow_player(player)
-                zombie.update_angle(player)
+                if room3_chase_active:
+                    zombie.follow_player(player)
+                    zombie.update_angle(player)
 
             if first_wave_started and not first_wave_completed and room3_locked and getattr(zombie, "wave_tag", "") == "wave1":
                 keep_zombie_in_room(
