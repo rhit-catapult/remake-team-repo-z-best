@@ -133,7 +133,8 @@ _stamp_room(top_section, map_data_6, 0, map4_width + map5_width)
 middle_section_rows = max(len(map_data_3), len(map_data_7))
 middle_section = _build_section(middle_section_rows, world_cols, fill_tile=1)
 _stamp_room(middle_section, map_data_3, 0, 0)
-_stamp_room(middle_section, map_data_7, 0, map4_width)
+map7_start_col = map4_width
+_stamp_room(middle_section, map_data_7, 0, map7_start_col)
 
 # Direct connector from room 6 (top section) down into room 7.
 connector_col_start = map4_width + map5_width + 4
@@ -179,8 +180,18 @@ map2_start_row = map4_rows_count + map3_rows_count
 map1_start_row = map4_rows_count + map3_rows_count + map2_rows_count
 map8_start_row = map2_start_row
 
+map7_start_row = map3_start_row
+map7_rows_count = len(map_data_7)
+map7_cols_count = len(map_data_7[0])
+
 map8_rows_count = len(map_data_8)
 map8_cols_count = len(map_data_8[0])
+
+# Passage zone connecting room 6 into the middle branch.
+room6_passage_start_row = map3_start_row
+room6_passage_end_row = map3_start_row + 4
+room6_passage_start_col = map4_width + 12
+room6_passage_end_col = map4_width + map5_width + 5
 
 # Rows above map 1 (maps 2-4) are considered locked until unlock.
 locked_rows_count = map1_start_row
