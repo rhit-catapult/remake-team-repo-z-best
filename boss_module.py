@@ -9,27 +9,27 @@ class level_title:
         self.level = room_number
     def draw(self):
         self.screen.blit((pygame.image.load("level.png")),(800,0))
-        if self.level is 1:
+        if self.level == 1:
             image_filename = ("1.png")
-        if self.level is 2:
+        if self.level == 2:
             image_filename = ("2.png")
-        if self.level is 3:
+        if self.level == 3:
             image_filename = ("3.png")
-        if self.level is 4: #Boss Jose
+        if self.level == 4: #Boss Jose
             image_filename = ("4_.png")
-        if self.level is 5:
+        if self.level == 5:
             image_filename = ("5.png")
-        if self.level is 6:
+        if self.level == 6:
             image_filename = ("6.png")
-        if self.level is 7: #Boss Autumn
+        if self.level == 7: #Boss Autumn
             image_filename = ("7_.png")
-        if self.level is 8:
+        if self.level == 8:
             image_filename = ("8.png")
-        if self.level is 9:
+        if self.level == 9:
             image_filename = ("9.png")
-        if self.level is 10: #Boss Ethan
+        if self.level == 10: #Boss Ethan
             image_filename = ("10_.png")
-        if self.level is 1 or 2 or 3 or 5 or 6 or 8 or 9:
+        if self.level in (1, 2, 3, 5, 6, 8, 9):
             self.x = 955
             self.y = 100
         else:
