@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+from collision import is_wall_collision, is_out_of_screen
 
 class Zombie:
     def __init__(self, screen, x, y, image_filename):
@@ -31,8 +32,17 @@ class Zombie:
         dx /= distance
         dy /= distance
 
-        self.x += dx * speed
-        self.y += dy * speed
+        move_x = dx * speed
+        move_y = dy * speed
+
+        # Resolve movement axis-by-axis so zombies cannot clip through walls/fences.
+        new_x = self.x + move_x
+        if not is_wall_collision(new_x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2) and not is_out_of_screen(new_x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2):
+            self.x = new_x
+
+        new_y = self.y + move_y
+        if not is_wall_collision(self.x - self.radius, new_y - self.radius, self.radius * 2, self.radius * 2) and not is_out_of_screen(self.x - self.radius, new_y - self.radius, self.radius * 2, self.radius * 2):
+            self.y = new_y
 
         self.rect.center = (self.x, self.y)
     def update_angle(self, player):
