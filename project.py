@@ -281,11 +281,31 @@ def spawn_corner_zombies_in_room(screen, player, count, room_start_row, room_sta
             break
 
         if not placed:
-            # Fallback: force place at the base corner location.
-            zombie = Zombie(screen, int(base_x), int(base_y), "ZombieFIXED.png")
-            zombie.hp = 3
-            zombie.wave_tag = "wave1"
-            zombies.append(zombie)
+            # Safe fallback: search anywhere in the room, but only on walkable tiles.
+            for _fallback_attempt in range(400):
+                x = random.randint(int(room_left + spawn_radius), int(room_right - spawn_radius))
+                y = random.randint(int(room_top + spawn_radius), int(room_bottom - spawn_radius))
+
+                collides_with_map = is_wall_collision(
+                    x - spawn_radius,
+                    y - spawn_radius,
+                    spawn_radius * 2,
+                    spawn_radius * 2,
+                )
+                if collides_with_map:
+                    continue
+
+                dx = player.x - x
+                dy = player.y - y
+                if math.hypot(dx, dy) <= (player.radius + 100):
+                    continue
+
+                zombie = Zombie(screen, x, y, "ZombieFIXED.png")
+                zombie.hp = 3
+                zombie.wave_tag = "wave1"
+                zombies.append(zombie)
+                placed = True
+                break
 
     return zombies
 
