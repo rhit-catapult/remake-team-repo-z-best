@@ -6,7 +6,7 @@ from healthbar import HealthBar
 from my_character import MainC
 from zombie_module import Zombie
 from map import Rooms
-from maps import full_world_map, map1_start_row, map2_start_row, map3_start_row, map4_start_row, map5_start_row, map5_start_col, map5_rows_count, map5_cols_count, items
+from maps import full_world_map, map1_start_row, map2_start_row, map3_start_row, map4_start_row, map5_start_row, map5_start_col, map5_rows_count, map5_cols_count, map8_start_row, map8_start_col, map8_rows_count, map8_cols_count, items
 from assets import TILE_SPRITES, ITEM_SPRITES
 from config import TILE_SIZE
 from collision import is_wall_collision, is_out_of_screen
@@ -47,6 +47,45 @@ def death_screen(screen):
 
         screen.blit(death_img, (0, 0))
         pygame.display.update()
+
+
+def escaped_screen(screen):
+    popup_font = pygame.font.Font(None, 104)
+    hint_font = pygame.font.Font(None, 44)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return
+
+        screen.fill((8, 26, 22))
+        title_text = popup_font.render("YOU ESCAPED", True, (230, 246, 233))
+        hint_text = hint_font.render("Press any key to continue", True, (205, 225, 212))
+
+        screen.blit(title_text, (1300 / 2 - title_text.get_width() / 2, 800 / 2 - 90))
+        screen.blit(hint_text, (1300 / 2 - hint_text.get_width() / 2, 800 / 2 + 20))
+        pygame.display.update()
+
+
+def _player_in_final_room(player):
+    col_idx = int(player.x // TILE_SIZE)
+    row_idx = int(player.y // TILE_SIZE)
+
+    in_bounds = (
+        map8_start_row <= row_idx < (map8_start_row + map8_rows_count)
+        and map8_start_col <= col_idx < (map8_start_col + map8_cols_count)
+    )
+    if not in_bounds:
+        return False
+
+    if row_idx < 0 or row_idx >= len(full_world_map):
+        return False
+    if col_idx < 0 or col_idx >= len(full_world_map[row_idx]):
+        return False
+
+    return full_world_map[row_idx][col_idx] not in (1, 4)
 
 
 # ---------------- ZOMBIE SPAWNING ---------------- #
@@ -170,6 +209,16 @@ def draw_level2_popup(screen):
     popup_font = pygame.font.Font(None, 120)
     level_text = popup_font.render("LEVEL 2", True, (240, 240, 240))
     screen.blit(level_text, (1300 / 2 - level_text.get_width() / 2, 800 / 2 - level_text.get_height() / 2))
+
+
+def draw_escape_prompt(screen):
+    prompt_bg = pygame.Surface((380, 54), pygame.SRCALPHA)
+    prompt_bg.fill((10, 32, 26, 190))
+    screen.blit(prompt_bg, (1300 / 2 - 190, 84))
+
+    popup_font = pygame.font.Font(None, 42)
+    prompt_text = popup_font.render("Press G to escape", True, (222, 245, 232))
+    screen.blit(prompt_text, (1300 / 2 - prompt_text.get_width() / 2, 95))
 
 
 def draw_pause_popup(screen, zombies_killed):
@@ -310,6 +359,10 @@ def main():
 
             if event.type == pygame.MOUSEBUTTONDOWN and not is_paused:
                 player.fire()
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_g and _player_in_final_room(player):
+                escaped_screen(screen)
+                return
             
             # E key unlocks one map layer at a time.
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
@@ -543,6 +596,9 @@ def main():
 
         if show_level2_popup:
             draw_level2_popup(screen)
+
+        if _player_in_final_room(player):
+            draw_escape_prompt(screen)
 
         level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
         screen.blit(level_text, (20, 760))

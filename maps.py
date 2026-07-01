@@ -86,18 +86,17 @@ map_data_7 = [
 
 # Map 8: Smaller lower-right room that forms the diagonal leg of the "R".
 map_data_8 = [
-    [1,1,1,1,1,1,1,1,1,1,1],
+    [0,0,0,0,1,1,1,1,1,1,1],
     [1,1,0,0,0,0,0,0,0,1,1],
     [1,1,0,0,0,0,0,0,0,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0],
     [1,1,1,1,1,1,1,1,0,0,0],
 ]
 
-# Open doorways on map 3 and map 2 right walls so new rooms connect naturally.
-for doorway_row in (3, 4):
-    map_data_3[doorway_row][12] = 0
+# Open doorway on map 2 right wall so it connects to the lower-right branch.
 for doorway_row in (4, 5):
+    map_data_2[doorway_row][11] = 0
     map_data_2[doorway_row][12] = 0
 
 
@@ -136,11 +135,21 @@ middle_section = _build_section(middle_section_rows, world_cols, fill_tile=1)
 _stamp_room(middle_section, map_data_3, 0, 0)
 _stamp_room(middle_section, map_data_7, 0, map4_width)
 
+# Direct connector from room 6 (top section) down into room 7.
+connector_col_start = map4_width + map5_width + 4
+connector_col_end = connector_col_start + 2
+for connector_row in range(0, 5):
+    for connector_col in range(connector_col_start, connector_col_end):
+        middle_section[connector_row][connector_col] = 0
+for connector_col in range(map4_width + 12, connector_col_end):
+    middle_section[4][connector_col] = 0
+
 # Lower-middle: room 2 plus smaller room 8 shifted right (diagonal leg of the R)
 lower_section_rows = max(len(map_data_2), len(map_data_8))
 lower_section = _build_section(lower_section_rows, world_cols, fill_tile=1)
 _stamp_room(lower_section, map_data_2, 0, 0)
-_stamp_room(lower_section, map_data_8, 0, map4_width + 7)
+map8_start_col = map4_width + 7
+_stamp_room(lower_section, map_data_8, 0, map8_start_col)
 
 # Bottom: room 1 only (left stem of the R)
 bottom_section = _build_section(len(map_data_1), world_cols, fill_tile=1)
@@ -168,6 +177,10 @@ map4_start_row = 0
 map3_start_row = map4_rows_count
 map2_start_row = map4_rows_count + map3_rows_count
 map1_start_row = map4_rows_count + map3_rows_count + map2_rows_count
+map8_start_row = map2_start_row
+
+map8_rows_count = len(map_data_8)
+map8_cols_count = len(map_data_8[0])
 
 # Rows above map 1 (maps 2-4) are considered locked until unlock.
 locked_rows_count = map1_start_row
