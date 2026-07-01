@@ -125,5 +125,6 @@ locked_rows_count = map1_start_row
 # 10=box, 20=corpse
 items = [
     (map1_start_row + 6, 9, 10),  # Box in map1
+    (map1_start_row + 6, 10, 10),
     (map1_start_row + 6, 6, 20)   # Corpse in map1
 ]

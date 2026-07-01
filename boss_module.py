@@ -49,7 +49,7 @@ class Boss_class:
         scale = size   # 50% size — change this number to whatever you want
         w = self.original_image.get_width()
         h = self.original_image.get_height()
-        self.final_image = pygame.transform.scale(self.original_image, (int(w * scale), int(h * scale)))   # adjust to match your zombie sprite size
+        self.final_image = pygame.transform.scale(self.original_image, (int(w * scale), int(h * scale)))
         self.image = self.final_image
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.hp = hp
@@ -70,6 +70,8 @@ class Boss_class:
         self.y += dy * speed
 
         self.rect.center = (self.x, self.y)
+        # Keep boss facing the player while moving.
+        self.update_angle(player)
     def update_angle(self, player):
         # Instantly face the player
         dx = player.x - self.x
@@ -77,7 +79,8 @@ class Boss_class:
 
         angle = math.degrees(math.atan2(-dy, dx))
 
-        self.image = pygame.transform.rotate(self.original_image, angle)
+        # Rotate the scaled image so boss size stays consistent while turning.
+        self.image = pygame.transform.rotate(self.final_image, angle)
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def draw(self):

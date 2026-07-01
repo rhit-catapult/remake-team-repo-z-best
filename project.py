@@ -64,6 +64,7 @@ def spawn_zombies(screen, player, count=5):
             distance = math.hypot(dx, dy)
 
 #<<<<<<< HEAD
+#<<<<<<< HEAD
             if distance > (player.radius + 100):
 #=======
                 collides_with_map = is_wall_collision(
@@ -71,10 +72,19 @@ def spawn_zombies(screen, player, count=5):
                     y - spawn_radius,
                     spawn_radius * 2,
                     spawn_radius * 2,
+#=======
+            collides_with_map = is_wall_collision(
+                x - spawn_radius,
+                y - spawn_radius,
+                spawn_radius * 2,
+                spawn_radius * 2,
+#>>>>>>> 11519016f43af35cfe3b25aa6de108a17947ae11
             )
-
             if distance > (player.radius + 100) and not collides_with_map:  # safe buffer + valid spawn tile
+<<<<<<< HEAD
 #>>>>>>> 6f8a55e8a833222b2c2a80bb274c30da3d1462bc
+=======
+>>>>>>> 11519016f43af35cfe3b25aa6de108a17947ae11
                 zombie = Zombie(screen, x, y, "ZombieFIXED.png")
                 zombie.hp = 3
                 zombies.append(zombie)
@@ -127,9 +137,17 @@ def draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unloc
             if tile_id in TILE_SPRITES:
                 screen_x = col_idx * TILE_SIZE - view_offset_x * TILE_SIZE
                 screen_y = row_idx * TILE_SIZE - view_offset_y * TILE_SIZE
+<<<<<<< HEAD
                 tile_img = TILE_SPRITES[tile_id].copy()
                 if row_idx < unlocked_min_row:
                     tile_img.set_alpha(55)
+=======
+                should_darken = False
+                # Darken any map rows that are still locked.
+                if row_idx < unlocked_min_row:
+                    should_darken = True
+                # Keep room 5 dark until it is explicitly unlocked.
+>>>>>>> 11519016f43af35cfe3b25aa6de108a17947ae11
                 if (not room5_unlocked) and row_idx >= map5_start_row and row_idx < (map5_start_row + map5_rows_count) and col_idx >= map5_start_col:
                     should_darken = True
 
@@ -176,6 +194,31 @@ def draw_level2_popup(screen):
     popup_font = pygame.font.Font(None, 120)
     level_text = popup_font.render("LEVEL 2", True, (240, 240, 240))
     screen.blit(level_text, (1300 / 2 - level_text.get_width() / 2, 800 / 2 - level_text.get_height() / 2))
+
+
+def draw_pause_popup(screen, zombies_killed):
+    """Draw transparent pause popup with kill counter."""
+    overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 120))
+    screen.blit(overlay, (0, 0))
+
+    panel = pygame.Surface((540, 260), pygame.SRCALPHA)
+    panel.fill((20, 20, 20, 185))
+    panel_x = 1300 / 2 - 270
+    panel_y = 800 / 2 - 130
+    screen.blit(panel, (panel_x, panel_y))
+    pygame.draw.rect(screen, (230, 230, 230), (panel_x, panel_y, 540, 260), 2)
+
+    title_font = pygame.font.Font(None, 96)
+    text_font = pygame.font.Font(None, 44)
+
+    title_text = title_font.render("PAUSE", True, (245, 245, 245))
+    kills_text = text_font.render(f"Zombies killed: {zombies_killed}", True, (230, 230, 230))
+    hint_text = text_font.render("Press Space to Resume", True, (210, 210, 210))
+
+    screen.blit(title_text, (1300 / 2 - title_text.get_width() / 2, panel_y + 25))
+    screen.blit(kills_text, (1300 / 2 - kills_text.get_width() / 2, panel_y + 130))
+    screen.blit(hint_text, (1300 / 2 - hint_text.get_width() / 2, panel_y + 180))
 
 
 def draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, x, y):
@@ -267,6 +310,8 @@ def main():
     room5_unlocked = False
     show_popup = False
     next_map_number = 2
+    is_paused = False
+    zombies_killed = 0
     show_level2_popup = False
     level2_popup_started_at = 0
     level2_popup_duration_ms = 1800
@@ -283,9 +328,14 @@ def main():
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                is_paused = not is_paused
+                continue
+
+            if event.type == pygame.MOUSEBUTTONDOWN and not is_paused:
                 player.fire()
             
+            # E key unlocks one map layer at a time.
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
                 if unlocked_min_row == map1_start_row:
                     unlocked_min_row = map2_start_row
@@ -302,6 +352,29 @@ def main():
                     show_level2_popup = True
                     level2_popup_started_at = pygame.time.get_ticks()
                 show_popup = False
+
+        if is_paused:
+            screen.fill((255, 255, 255))
+            draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked)
+            draw_map_items(screen, view_offset_x, view_offset_y)
+
+            for bullet in player.bullets:
+                screen.blit(bullet.peanut, (bullet.bullet_x - view_offset_x * TILE_SIZE, bullet.bullet_y - view_offset_y * TILE_SIZE))
+
+            player.rect.center = (player.x - view_offset_x * TILE_SIZE, player.y - view_offset_y * TILE_SIZE)
+            player.draw()
+
+            for zombie in zombies:
+                old_x, old_y = zombie.rect.x, zombie.rect.y
+                zombie.rect.center = (zombie.x - view_offset_x * TILE_SIZE, zombie.y - view_offset_y * TILE_SIZE)
+                zombie.draw()
+                zombie.rect.x, zombie.rect.y = old_x, old_y
+
+            healthbar.draw()
+            draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, minimap_x, minimap_y)
+            draw_pause_popup(screen, zombies_killed)
+            pygame.display.update()
+            continue
 
         pressed_keys = pygame.key.get_pressed()
 
@@ -378,7 +451,6 @@ def main():
         # ---------------- BOSS MOVEMENT ---------------- #
         if boss_spawned and boss is not None:
             boss.follow_player(player)
-            boss.update_angle(player)
 
             dx = player.x - boss.x
             dy = player.y - boss.y
@@ -419,6 +491,7 @@ def main():
 
                     if zombie.hp <= 0:
                         zombies.remove(zombie)
+                        zombies_killed += 1
 
                     break
 
@@ -479,9 +552,9 @@ def main():
 
             # Spawn boss at Level 5
             if current_level == 5:
-                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 4)
+                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 5.1)
                 boss.hp = 20
-                boss.radius = 70
+                boss.radius = (boss.image.get_width() / 2) + 2
                 boss_spawned = True
             else:
                 zombies = spawn_zombies(screen, player, 5)
