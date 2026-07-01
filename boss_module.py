@@ -70,6 +70,8 @@ class Boss_class:
         self.y += dy * speed
 
         self.rect.center = (self.x, self.y)
+        # Keep boss facing the player while moving.
+        self.update_angle(player)
     def update_angle(self, player):
         # Instantly face the player
         dx = player.x - self.x

@@ -430,7 +430,6 @@ def main():
         # ---------------- BOSS MOVEMENT ---------------- #
         if boss_spawned and boss is not None:
             boss.follow_player(player)
-            boss.update_angle(player)
 
             dx = player.x - boss.x
             dy = player.y - boss.y
@@ -532,7 +531,7 @@ def main():
 
             # Spawn boss at Level 5
             if current_level == 5:
-                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 5.5)
+                boss = Boss_class(screen, player.x + 300, player.y + 300, "Boss_Jose.png", 20, 5.1)
                 boss.hp = 20
                 boss.radius = (boss.image.get_width() / 2) + 2
                 boss_spawned = True
