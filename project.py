@@ -69,6 +69,39 @@ def escaped_screen(screen):
         pygame.display.update()
 
 
+def rescued_escape_screen(screen, elapsed_seconds, zombies_killed):
+    popup_font = pygame.font.Font(None, 104)
+    stat_font = pygame.font.Font(None, 52)
+    hint_font = pygame.font.Font(None, 42)
+
+    mins = elapsed_seconds // 60
+    secs = elapsed_seconds % 60
+    time_text = f"Time Survived: {mins:02d}:{secs:02d}"
+    kills_text = f"Zombies Killed: {zombies_killed}"
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return
+
+        overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
+        overlay.fill((10, 30, 22, 220))
+        screen.blit(overlay, (0, 0))
+
+        title_text = popup_font.render("CONGRATULATIONS", True, (232, 246, 235))
+        survived_text = stat_font.render(time_text, True, (225, 240, 230))
+        killed_text = stat_font.render(kills_text, True, (225, 240, 230))
+        hint_text = hint_font.render("You rescued JJ junior. Press any key.", True, (205, 225, 212))
+
+        screen.blit(title_text, (1300 / 2 - title_text.get_width() / 2, 800 / 2 - 170))
+        screen.blit(survived_text, (1300 / 2 - survived_text.get_width() / 2, 800 / 2 - 20))
+        screen.blit(killed_text, (1300 / 2 - killed_text.get_width() / 2, 800 / 2 + 40))
+        screen.blit(hint_text, (1300 / 2 - hint_text.get_width() / 2, 800 / 2 + 120))
+        pygame.display.update()
+
+
 def _player_in_final_room(player):
     col_idx = int(player.x // TILE_SIZE)
     row_idx = int(player.y // TILE_SIZE)
@@ -117,6 +150,25 @@ def _player_in_room3(player):
         map3_room_rows_count,
         map3_room_cols_count,
     )
+
+
+def _find_jj_item():
+    for item in items:
+        if len(item) == 3 and item[2] == 30:
+            return item
+    return None
+
+
+def _is_player_near_jj(player, jj_item):
+    if jj_item is None:
+        return False
+
+    row, col, _item_type = jj_item
+    item_center_x = col * TILE_SIZE + TILE_SIZE / 2
+    item_center_y = row * TILE_SIZE + TILE_SIZE / 2
+    distance = math.hypot(player.x - item_center_x, player.y - item_center_y)
+
+    return distance <= (TILE_SIZE * 1.2)
 
 
 def _intersects_room(player_x, player_y, radius, room_start_row, room_start_col, room_rows, room_cols):
@@ -500,6 +552,16 @@ def draw_escape_prompt(screen):
     screen.blit(prompt_text, (1300 / 2 - prompt_text.get_width() / 2, 95))
 
 
+def draw_pickup_prompt(screen):
+    prompt_bg = pygame.Surface((470, 54), pygame.SRCALPHA)
+    prompt_bg.fill((28, 26, 10, 200))
+    screen.blit(prompt_bg, (1300 / 2 - 235, 148))
+
+    popup_font = pygame.font.Font(None, 42)
+    prompt_text = popup_font.render("Press E to pick up JJ junior", True, (245, 235, 190))
+    screen.blit(prompt_text, (1300 / 2 - prompt_text.get_width() / 2, 159))
+
+
 def draw_pause_popup(screen, zombies_killed):
     """Draw transparent pause popup with kill counter."""
     overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
@@ -718,6 +780,7 @@ def main():
     map2_start_col = 0
     map2_room_rows_count = map1_start_row - map2_start_row
     map2_room_cols_count = map3_room_cols_count
+    jj_picked_up = False
 
     zombies = []
 
@@ -739,8 +802,20 @@ def main():
                 player.fire()
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g and _player_in_final_room(player):
-                escaped_screen(screen)
+                total_survival_s = max(0, (pygame.time.get_ticks() - stage1_started_at) // 1000)
+                if jj_picked_up:
+                    rescued_escape_screen(screen, total_survival_s, zombies_killed)
+                else:
+                    escaped_screen(screen)
                 return
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                jj_item = _find_jj_item()
+                if (not jj_picked_up) and _is_player_near_jj(player, jj_item):
+                    jj_picked_up = True
+                    if jj_item in items:
+                        items.remove(jj_item)
+                    continue
             
             # E key unlocks one map layer at a time.
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
@@ -1087,6 +1162,9 @@ def main():
 
         if _player_in_final_room(player):
             draw_escape_prompt(screen)
+
+        if (not jj_picked_up) and _is_player_near_jj(player, _find_jj_item()):
+            draw_pickup_prompt(screen)
 
         level_text = font.render(f"Level: {current_level}", True, (0, 0, 0))
         screen.blit(level_text, (20, 760))
