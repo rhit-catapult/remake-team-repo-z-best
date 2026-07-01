@@ -249,7 +249,11 @@ def move_patrol_zombie(zombie, room_start_row, room_start_col, room_rows, room_c
 
     zombie.x = max(min_x, min(next_x, max_x))
     zombie.y = max(min_y, min(zombie.y, max_y))
-    zombie.rect.center = (zombie.x, zombie.y)
+
+    # Face the direction of patrol movement: right=0deg, left=180deg.
+    facing_angle = 0 if zombie.patrol_dir > 0 else 180
+    zombie.image = pygame.transform.rotate(zombie.original_image, facing_angle)
+    zombie.rect = zombie.image.get_rect(center=(zombie.x, zombie.y))
 
 
 # ---------------- MAP RENDERING ---------------- #
