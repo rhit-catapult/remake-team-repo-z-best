@@ -15,7 +15,7 @@ def is_wall_collision(x, y, w, h):
         for c in range(left_col, right_col + 1):
             if c < 0 or c >= len(full_world_map[r]):
                 continue
-            if full_world_map[r][c] == 1:
+            if full_world_map[r][c] in (1, 4):
                 return True
     return False
 

@@ -49,24 +49,46 @@ map_data_4 = [
 
 map_data_5 = [
     [4,4,4,4,4,4,4,4,4,4,4,4,4],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2],
+    [4,2,2,2,2,2,2,2,2,2,2,2,4],
+    [4,2,2,2,2,2,2,2,2,2,2,2,4],
+    [4,2,2,2,2,2,2,2,2,2,2,2,4],
+    [4,2,2,2,2,2,2,2,2,2,2,2,4],
+    [4,2,2,2,2,2,2,2,2,2,2,2,4],
+    [4,2,2,2,2,2,2,2,2,2,2,2,4],
+    [4,2,2,2,2,2,2,2,2,2,2,2,4],
     [4,4,4,4,4,4,4,4,4,4,4,4,4],
 
 ]
-# Combine maps from top to bottom: 4, 3, 2, 1
-# This keeps map 1 as the bottom-most section of the world.
-full_world_map = map_data_4 + map_data_3 + map_data_2 + map_data_1
 
-map4_rows_count = len(map_data_4)
+# Attach map 5 to the right side of map 4.
+top_section_rows = max(len(map_data_4), len(map_data_5))
+map4_width = len(map_data_4[0])
+map5_width = len(map_data_5[0])
+
+map4_padded = [row[:] for row in map_data_4]
+map5_padded = [row[:] for row in map_data_5]
+
+while len(map4_padded) < top_section_rows:
+    map4_padded.append([1] * map4_width)
+
+while len(map5_padded) < top_section_rows:
+    map5_padded.append([4] * map5_width)
+
+map_data_4_5 = [left_row + right_row for left_row, right_row in zip(map4_padded, map5_padded)]
+
+# Combine maps from top to bottom: (4+5), 3, 2, 1.
+# This keeps map 1 as the bottom-most section of the world.
+full_world_map = map_data_4_5 + map_data_3 + map_data_2 + map_data_1
+
+map4_rows_count = len(map_data_4_5)
 map3_rows_count = len(map_data_3)
 map2_rows_count = len(map_data_2)
 map1_rows_count = len(map_data_1)
+
+map5_rows_count = len(map5_padded)
+map5_cols_count = map5_width
+map5_start_col = map4_width
+map5_start_row = 0
 
 map4_start_row = 0
 map3_start_row = map4_rows_count
