@@ -39,10 +39,11 @@ class level_title:
 
 
 class Boss_class:
-    def __init__(self, screen, x, y, image_filename, hp, size):
+    def __init__(self, screen, x, y, image_filename, hp, size, angle_offset=0):
         self.screen = screen            
         self.x = x
         self.y = y
+        self.angle_offset = angle_offset
         self.original_image = pygame.image.load(image_filename).convert_alpha()
         
 # SCALE THE ZOMBIE
@@ -77,7 +78,7 @@ class Boss_class:
         dx = player.x - self.x
         dy = player.y - self.y
 
-        angle = math.degrees(math.atan2(-dy, dx))
+        angle = math.degrees(math.atan2(-dy, dx)) + self.angle_offset
 
         # Rotate the scaled image so boss size stays consistent while turning.
         self.image = pygame.transform.rotate(self.final_image, angle)

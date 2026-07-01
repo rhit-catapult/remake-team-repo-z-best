@@ -773,7 +773,7 @@ def main():
     boss_autum_spawned = False
     boss_autum = None
     boss_autum_max_hp = 0
-    autum_summon_interval_ms = 10000
+    autum_summon_interval_ms = 5000
     autum_last_summon_at = 0
 
     pygame.init()
@@ -917,7 +917,7 @@ def main():
                     if not boss_autum_spawned:
                         autum_spawn_x = TILE_SIZE * (map6_start_col + map6_cols_count // 2)
                         autum_spawn_y = TILE_SIZE * (map6_start_row + map6_rows_count // 2)
-                        boss_autum = Boss_class(screen, autum_spawn_x, autum_spawn_y, "Boss_Autum.png", 60, 6.5)
+                        boss_autum = Boss_class(screen, autum_spawn_x, autum_spawn_y, "Boss_Autum.png", 60, 6.5, angle_offset=90)
                         boss_autum.hp = 60
                         boss_autum_max_hp = boss_autum.hp
                         boss_autum.radius = (boss_autum.image.get_width() / 2) + 2
