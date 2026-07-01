@@ -587,6 +587,15 @@ def main():
         # ---------------- BULLET COLLISION ---------------- #
         for bullet in player.bullets[:]:
             bullet.move()
+
+            bullet_w = bullet.peanut.get_width()
+            bullet_h = bullet.peanut.get_height()
+            hits_wall = is_wall_collision(bullet.bullet_x, bullet.bullet_y, bullet_w, bullet_h)
+            out_of_bounds = is_out_of_screen(bullet.bullet_x, bullet.bullet_y, bullet_w, bullet_h)
+            if hits_wall or out_of_bounds:
+                player.bullets.remove(bullet)
+                continue
+
             screen.blit(bullet.peanut, (bullet.bullet_x - view_offset_x * TILE_SIZE, bullet.bullet_y - view_offset_y * TILE_SIZE))
 
             # Bullet → Zombie
