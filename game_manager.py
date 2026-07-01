@@ -19,7 +19,7 @@ class GameManager:
         self.is_unlocked = False
         self.show_popup = False
         self.running = True
-        self.trigger_pos = (TILE_SIZE * 6, TILE_SIZE * (map1_start_row) + 1)
+        self.trigger_y = TILE_SIZE * (map1_start_row + 1)
     
     def handle_events(self):
         """Handle pygame events"""
@@ -32,10 +32,7 @@ class GameManager:
     
     def check_popup_trigger(self):
         """Check if player triggered popup"""
-        if not self.is_unlocked and not self.show_popup:
-            if abs(self.player_x - self.trigger_pos[0]) < TILE_SIZE and \
-               abs(self.player_y - self.trigger_pos[1]) < TILE_SIZE:
-                self.show_popup = True
+        self.show_popup = (not self.is_unlocked) and (self.player_y <= self.trigger_y)
     
     def update(self):
         """Update game state"""

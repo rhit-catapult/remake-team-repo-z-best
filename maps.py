@@ -46,10 +46,22 @@ map_data_4 = [
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
     [1,1,0,0,0,0,0,0,0,0,0,1,1],
 ]
-# Combine maps: map_data_2 on top, map_data_1 on bottom
+# Combine maps from top to bottom: 4, 3, 2, 1
+# This keeps map 1 as the bottom-most section of the world.
 full_world_map = map_data_4 + map_data_3 + map_data_2 + map_data_1
+
+map4_rows_count = len(map_data_4)
+map3_rows_count = len(map_data_3)
 map2_rows_count = len(map_data_2)
-map1_start_row = map2_rows_count
+map1_rows_count = len(map_data_1)
+
+map4_start_row = 0
+map3_start_row = map4_rows_count
+map2_start_row = map4_rows_count + map3_rows_count
+map1_start_row = map4_rows_count + map3_rows_count + map2_rows_count
+
+# Rows above map 1 (maps 2-4) are considered locked until unlock.
+locked_rows_count = map1_start_row
 
 # Items: (row, column, item_type)
 # 10=box, 20=corpse
