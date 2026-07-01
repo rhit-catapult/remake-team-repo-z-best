@@ -640,12 +640,12 @@ def draw_boss_health_bar(screen, boss, max_hp, view_offset_x, view_offset_y):
     bar_x = int(screen_x - bar_width / 2)
     bar_y = int(screen_y - boss.radius - 24)
 
-    if hp_ratio <= 0.35:
-        hp_color = (220, 52, 52)
-    elif hp_ratio <= 0.65:
-        hp_color = (232, 182, 48)
+    if hp_ratio <= (1 / 3):
+        hp_color = (220, 55, 55)
+    elif hp_ratio <= (2 / 3):
+        hp_color = (235, 150, 45)
     else:
-        hp_color = (76, 214, 108)
+        hp_color = (60, 220, 90)
 
     pygame.draw.rect(screen, (14, 14, 14), (bar_x - border, bar_y - border, bar_width + border * 2, bar_height + border * 2))
     pygame.draw.rect(screen, (95, 30, 30), (bar_x, bar_y, bar_width, bar_height))
@@ -1118,6 +1118,8 @@ def main():
                     player.bullets.remove(bullet)
 
                     if boss.hp <= 0:
+                        player.hp = 4
+                        healthbar.set_hp(player.hp)
                         boss = None
                         boss_spawned = False
                         current_level += 1
