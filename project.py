@@ -179,6 +179,31 @@ def draw_level2_popup(screen):
     screen.blit(level_text, (1300 / 2 - level_text.get_width() / 2, 800 / 2 - level_text.get_height() / 2))
 
 
+def draw_pause_popup(screen, zombies_killed):
+    """Draw transparent pause popup with kill counter."""
+    overlay = pygame.Surface((1300, 800), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 120))
+    screen.blit(overlay, (0, 0))
+
+    panel = pygame.Surface((540, 260), pygame.SRCALPHA)
+    panel.fill((20, 20, 20, 185))
+    panel_x = 1300 / 2 - 270
+    panel_y = 800 / 2 - 130
+    screen.blit(panel, (panel_x, panel_y))
+    pygame.draw.rect(screen, (230, 230, 230), (panel_x, panel_y, 540, 260), 2)
+
+    title_font = pygame.font.Font(None, 96)
+    text_font = pygame.font.Font(None, 44)
+
+    title_text = title_font.render("PAUSE", True, (245, 245, 245))
+    kills_text = text_font.render(f"Zombies killed: {zombies_killed}", True, (230, 230, 230))
+    hint_text = text_font.render("Press Space to Resume", True, (210, 210, 210))
+
+    screen.blit(title_text, (1300 / 2 - title_text.get_width() / 2, panel_y + 25))
+    screen.blit(kills_text, (1300 / 2 - kills_text.get_width() / 2, panel_y + 130))
+    screen.blit(hint_text, (1300 / 2 - hint_text.get_width() / 2, panel_y + 180))
+
+
 def draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, x, y):
     """Draw a full-map minimap with player/zombie markers and lock shading."""
     map_rows = len(full_world_map)
@@ -269,6 +294,8 @@ def main():
     room5_unlocked = False
     show_popup = False
     next_map_number = 2
+    is_paused = False
+    zombies_killed = 0
     show_level2_popup = False
     level2_popup_started_at = 0
     level2_popup_duration_ms = 1800
@@ -285,11 +312,15 @@ def main():
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                is_paused = not is_paused
+                continue
+
+            if event.type == pygame.MOUSEBUTTONDOWN and not is_paused:
                 player.fire()
             
             # E key unlocks one map layer at a time.
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e and show_popup and not is_paused:
                 if unlocked_min_row == map1_start_row:
                     unlocked_min_row = map2_start_row
                     next_map_number = 3
@@ -305,6 +336,29 @@ def main():
                     show_level2_popup = True
                     level2_popup_started_at = pygame.time.get_ticks()
                 show_popup = False
+
+        if is_paused:
+            screen.fill((255, 255, 255))
+            draw_map(screen, view_offset_x, view_offset_y, unlocked_min_row, room5_unlocked)
+            draw_map_items(screen, view_offset_x, view_offset_y)
+
+            for bullet in player.bullets:
+                screen.blit(bullet.peanut, (bullet.bullet_x - view_offset_x * TILE_SIZE, bullet.bullet_y - view_offset_y * TILE_SIZE))
+
+            player.rect.center = (player.x - view_offset_x * TILE_SIZE, player.y - view_offset_y * TILE_SIZE)
+            player.draw()
+
+            for zombie in zombies:
+                old_x, old_y = zombie.rect.x, zombie.rect.y
+                zombie.rect.center = (zombie.x - view_offset_x * TILE_SIZE, zombie.y - view_offset_y * TILE_SIZE)
+                zombie.draw()
+                zombie.rect.x, zombie.rect.y = old_x, old_y
+
+            healthbar.draw()
+            draw_minimap(screen, player, zombies, unlocked_min_row, room5_unlocked, minimap_x, minimap_y)
+            draw_pause_popup(screen, zombies_killed)
+            pygame.display.update()
+            continue
 
         pressed_keys = pygame.key.get_pressed()
 
@@ -410,6 +464,7 @@ def main():
 
                     if zombie.hp <= 0:
                         zombies.remove(zombie)
+                        zombies_killed += 1
 
                     break  # stop checking other zombies for this bullet
 
